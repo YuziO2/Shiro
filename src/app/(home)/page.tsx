@@ -489,7 +489,7 @@ const FriendScreen = () => {
     <Screen className="flex h-auto min-h-[100vh] center">
       <div className="flex min-w-0 flex-col">
         <BottomToUpTransitionView className="text-center text-3xl font-medium">
-          这些是我珍视的人，他们陪伴我走过人生的每一段旅程。
+          这些是我的网上邻居，网络姻缘一线牵~，冲浪时间真的很美好。
         </BottomToUpTransitionView>
         <ul
           className={clsx(
