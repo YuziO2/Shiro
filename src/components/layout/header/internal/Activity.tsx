@@ -31,6 +31,7 @@ const appDescription = {
   QQ音乐: '听歌',
 
   'Google Chrome': '冲浪',
+  Arc: '在知识的海洋遨游',
   'Google Chrome Canary': '调试',
   QQ: '水群',
   Messages: '看验证码',
