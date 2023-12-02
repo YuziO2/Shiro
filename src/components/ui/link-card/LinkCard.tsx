@@ -1,6 +1,4 @@
-'use client'
-
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 import clsx from 'clsx'
 import Link from 'next/link'
@@ -16,9 +14,9 @@ import { preventDefault } from '~/lib/dom'
 import { fetchGitHubApi } from '~/lib/github'
 import { apiClient } from '~/lib/request'
 
+import { LinkCardSource } from './enums'
 import styles from './LinkCard.module.css'
 
-export type LinkCardSource = 'gh' | 'self' | 'mx-space' | 'gh-commit' | 'gh-pr'
 export interface LinkCardProps {
   id: string
   source?: LinkCardSource
@@ -36,13 +34,12 @@ export const LinkCard = (props: LinkCardProps) => {
     </LazyLoad>
   )
 }
+
 const LinkCardImpl: FC<LinkCardProps> = (props) => {
-  const { id = '', source = 'self', className } = props
+  const { id, source = LinkCardSource.Self, className } = props
 
   const [loading, setLoading] = useState(true)
   const [isError, setIsError] = useState(false)
-  const fetchFnRef = useRef<() => Promise<any>>()
-
   const [fullUrl, setFullUrl] = useState('about:blank')
   const [cardInfo, setCardInfo] = useState<{
     title: ReactNode
@@ -59,197 +56,23 @@ const LinkCardImpl: FC<LinkCardProps> = (props) => {
     [fullUrl],
   )
 
-  const isValidType = useMemo(() => {
-    switch (source) {
-      case 'mx-space':
-      case 'self': {
-        const [variant, params, ...rest] = id.split('/')
+  const { isValid, fetchFn } = useMemo(
+    () => validTypeAndFetchFunction(source, id),
+    [source, id],
+  )
 
-        if (!params) {
-          return false
-        }
-
-        switch (variant) {
-          case 'notes': {
-            // e.g. variant === 'notes' ,  params === 124
-            const valid = !isNaN(+params)
-            if (!valid) {
-              return false
-            }
-            fetchFnRef.current = async () => {
-              return apiClient.note.getNoteById(+params).then((res) => {
-                const { title, images, text } = res.data
-                setCardInfo({
-                  title,
-                  desc: `${RemoveMarkdown(text).slice(0, 50)}...`,
-                  // TODO
-                  image: images?.[0]?.src,
-                })
-              })
-            }
-            setFullUrl(`/notes/${params}`)
-
-            return true
-          }
-          case 'posts': {
-            // e.g. posts/programming/shell-output-via-sse
-            const [slug] = rest
-            if (!slug || !params) {
-              return false
-            }
-
-            fetchFnRef.current = async () => {
-              return apiClient.post.getPost(params, slug).then((res) => {
-                const { title, images, text, summary } = res
-                setCardInfo({
-                  title,
-                  desc: summary ?? `${RemoveMarkdown(text).slice(0, 50)}...`,
-                  // TODO
-                  image: images?.[0]?.src,
-                })
-              })
-            }
-            setFullUrl(`/posts/${params}/${slug}`)
-
-            return true
-          }
-          default: {
-            return false
-          }
-        }
-      }
-      case 'gh': {
-        // e.g. mx-space/kami
-        const [namespace, repo, ...rest] = id.split('/')
-        if (!namespace || !repo) {
-          return false
-        }
-
-        fetchFnRef.current = async () => {
-          // https://api.github.com/repos/mx-space/core
-          const data = await fetchGitHubApi<any>(
-            `https://api.github.com/repos/${namespace}/${repo}`,
-          )
-            .then((data) => camelcaseKeys(data))
-            .catch(() => {
-              // set fallback url
-              //
-              setFullUrl(`https://github.com/${namespace}/${repo}`)
-            })
-
-          setCardInfo({
-            image: data.owner.avatarUrl,
-            title: data.fullName,
-            desc: data.description,
-          })
-          setFullUrl(data.htmlUrl)
-        }
-
-        return !rest.length
-      }
-      case 'gh-commit': {
-        // e.g. mx-space/kami/commit/1234567890
-        const [namespace, repo, variant, commitId] = id.split('/')
-
-        if (!namespace || !repo || !commitId) {
-          return false
-        }
-        if (variant !== 'commit') {
-          return false
-        }
-
-        fetchFnRef.current = async () => {
-          const data = await fetchGitHubApi<any>(
-            `https://api.github.com/repos/${namespace}/${repo}/commits/${commitId}`,
-          )
-            .then((data) => camelcaseKeys(data))
-            .catch(() => {
-              // set fallback url
-              //
-              setFullUrl(
-                `https://github.com/${namespace}/${repo}/commit/${commitId}`,
-              )
-            })
-
-          setCardInfo({
-            image: data.author.avatarUrl,
-            title: (
-              <span className="font-normal">
-                {data.commit.message.replace(/Signed-off-by:.+/, '')}
-              </span>
-            ),
-            desc: (
-              <span className="flex items-center space-x-5 font-mono">
-                <span className="text-uk-green-light">
-                  +{data.stats.additions}
-                </span>
-                <span className="text-uk-red-light">
-                  -{data.stats.deletions}
-                </span>
-
-                <span className="text-sm">{data.sha.slice(0, 7)}</span>
-
-                <span className="text-sm opacity-80">
-                  {namespace}/{repo}
-                </span>
-              </span>
-            ),
-          })
-          setFullUrl(data.htmlUrl)
-        }
-
-        return true
-      }
-
-      case 'gh-pr': {
-        // ${owner}/${repo}/${pr}
-        const [owner, repo, pr] = id.split('/')
-        if (!owner || !repo || !pr) {
-          return false
-        }
-        fetchFnRef.current = async () => {
-          const data = await fetchGitHubApi<any>(
-            `https://api.github.com/repos/${owner}/${repo}/pulls/${pr}`,
-          )
-            .then((data) => camelcaseKeys(data))
-            .catch(() => {
-              // set fallback url
-              //
-              setFullUrl(`https://github.com/${owner}/${repo}/commit/${pr}`)
-            })
-
-          setCardInfo({
-            image: data.user.avatarUrl,
-            title: <span>{data.title}</span>,
-            desc: (
-              <span className="flex items-center space-x-5 font-mono">
-                <span className="text-uk-green-light">+{data.additions}</span>
-                <span className="text-uk-red-light">-{data.deletions}</span>
-                <span className="text-sm opacity-80">
-                  {owner}/{repo}
-                </span>
-              </span>
-            ),
-          })
-          setFullUrl(data.htmlUrl)
-        }
-
-        return true
-      }
-    }
-  }, [source, id])
   const fetchInfo = useCallback(async () => {
-    if (!fetchFnRef.current) {
+    if (!fetchFn) {
       return
     }
     setLoading(true)
 
-    await fetchFnRef.current().catch((err) => {
+    await fetchFn(id, setCardInfo, setFullUrl).catch((err) => {
       console.log('fetch card info error: ', err)
       setIsError(true)
     })
     setLoading(false)
-  }, [])
+  }, [fetchFn, id])
 
   const { ref } = useInView({
     triggerOnce: true,
@@ -262,7 +85,7 @@ const LinkCardImpl: FC<LinkCardProps> = (props) => {
     },
   })
 
-  if (!isValidType) {
+  if (!isValid) {
     return null
   }
 
@@ -310,4 +133,202 @@ const LinkCardSkeleton = () => {
       <span className={styles['image']} />
     </span>
   )
+}
+
+type FetchFunction = (
+  id: string,
+  setCardInfo: React.Dispatch<
+    React.SetStateAction<
+      | {
+          title: ReactNode
+          desc?: ReactNode
+          image?: string | undefined
+        }
+      | undefined
+    >
+  >,
+  setFullUrl: (url: string) => void,
+) => Promise<void>
+
+type FetchObject = {
+  isValid: (id: string) => boolean
+  fetch: FetchFunction
+}
+
+function validTypeAndFetchFunction(source: LinkCardSource, id: string) {
+  const fetchDataFunctions = {
+    [LinkCardSource.MixSpace]: fetchMxSpaceData,
+    [LinkCardSource.GHRepo]: fetchGitHubData,
+    [LinkCardSource.GHCommit]: fetchGitHubCommitData,
+    [LinkCardSource.GHPr]: fetchGitHubPRData,
+    [LinkCardSource.Self]: fetchMxSpaceData,
+  } as Record<LinkCardSource, FetchObject>
+
+  const fetchFunction = fetchDataFunctions[source]
+  if (!fetchFunction) {
+    return { isValid: false, fetchFn: null }
+  }
+
+  const isValid = fetchFunction.isValid(id)
+  return { isValid, fetchFn: isValid ? fetchFunction.fetch : null }
+}
+
+const fetchGitHubData: FetchObject = {
+  isValid: (id) => {
+    // owner/repo
+    const parts = id.split('/')
+    return parts.length === 2 && parts[0].length > 0 && parts[1].length > 0
+  },
+  fetch: async (id, setCardInfo, setFullUrl) => {
+    const [owner, repo] = id.split('/')
+    try {
+      const response = await fetchGitHubApi(
+        `https://api.github.com/repos/${owner}/${repo}`,
+      )
+      const data = camelcaseKeys(response)
+
+      setCardInfo({
+        title: data.name,
+        desc: data.description,
+        image: data.owner.avatarUrl,
+      })
+
+      setFullUrl(data.htmlUrl)
+    } catch (err) {
+      console.error('Error fetching GitHub data:', err)
+      throw err
+    }
+  },
+}
+
+const fetchGitHubCommitData: FetchObject = {
+  isValid: (id) => {
+    // 假设 'gh-commit' 类型的 id 应该是 'username/repo/commit/commitId' 的形式
+    const parts = id.split('/')
+    return (
+      parts.length === 4 &&
+      parts.every((part) => part.length > 0) &&
+      parts[2] === 'commit'
+    )
+  },
+  fetch: async (id, setCardInfo, setFullUrl) => {
+    const [owner, repo, , commitId] = id.split('/')
+    try {
+      const response = await fetchGitHubApi(
+        `https://api.github.com/repos/${owner}/${repo}/commits/${commitId}`,
+      )
+      const data = camelcaseKeys(response)
+
+      setCardInfo({
+        title: (
+          <span className="font-normal">
+            {data.commit.message.replace(/Signed-off-by:.+/, '')}
+          </span>
+        ),
+        desc: (
+          <span className="flex items-center space-x-5 font-mono">
+            <span className="text-uk-green-light">+{data.stats.additions}</span>
+            <span className="text-uk-red-light">-{data.stats.deletions}</span>
+
+            <span className="text-sm">{data.sha.slice(0, 7)}</span>
+
+            <span className="text-sm opacity-80">
+              {owner}/{repo}
+            </span>
+          </span>
+        ),
+        image: data.author?.avatarUrl,
+      })
+
+      setFullUrl(`https://github.com/${owner}/${repo}/commit/${commitId}`)
+    } catch (err) {
+      console.error('Error fetching GitHub commit data:', err)
+      throw err
+    }
+  },
+}
+
+const fetchGitHubPRData: FetchObject = {
+  isValid: (id) => {
+    // ${owner}/${repo}/${pr}
+    const parts = id.split('/')
+    return parts.length === 3 && parts.every((part) => part.length > 0)
+  },
+  fetch: async (id, setCardInfo, setFullUrl) => {
+    const [owner, repo, , prNumber] = id.split('/')
+    try {
+      const response = await fetchGitHubApi(
+        `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
+      )
+      const data = camelcaseKeys(response)
+
+      setCardInfo({
+        title: `PR: ${data.title}`,
+        desc: (
+          <span className="flex items-center space-x-5 font-mono">
+            <span className="text-uk-green-light">+{data.additions}</span>
+            <span className="text-uk-red-light">-{data.deletions}</span>
+            <span className="text-sm opacity-80">
+              {owner}/{repo}
+            </span>
+          </span>
+        ),
+        image: data.user.avatarUrl,
+      })
+
+      setFullUrl(data.htmlUrl)
+    } catch (err) {
+      console.error('Error fetching GitHub PR data:', err)
+      throw err
+    }
+  },
+}
+
+const fetchMxSpaceData: FetchObject = {
+  isValid: (id) => {
+    // 'posts/cate/slug' 或 'notes/nid'
+    const [type, ...rest] = id.split('/')
+    if (type !== 'posts' && type !== 'notes') {
+      return false
+    }
+
+    if (type === 'posts') {
+      return rest.length === 2
+    }
+    return rest.length === 1
+  },
+  fetch: async (id, setCardInfo, setFullUrl) => {
+    const [type, ...rest] = id.split('/')
+    try {
+      let data: {
+        title: string
+        text: string
+        images?: { src: string }[]
+        meta?: Record<string, any>
+        cover?: string
+        summary?: string
+      } = { title: '', text: '' }
+
+      if (type === 'posts') {
+        const [cate, slug] = rest
+        const response = await apiClient.post.getPost(cate, slug)
+        data = response
+        setFullUrl(`/posts/${cate}/${slug}`)
+      } else if (type === 'notes') {
+        const [nid] = rest
+        const response = await apiClient.note.getNoteById(nid)
+        data = response
+        setFullUrl(`/notes/${nid}`)
+      }
+
+      setCardInfo({
+        title: data.title,
+        desc: data.summary || `${RemoveMarkdown(data.text).slice(0, 50)}...`,
+        image: data.cover || data.meta?.cover || data.images?.[0]?.src,
+      })
+    } catch (err) {
+      console.error('Error fetching self data:', err)
+      throw err
+    }
+  },
 }
