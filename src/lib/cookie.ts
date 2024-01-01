@@ -3,11 +3,13 @@ import Cookies from 'js-cookie'
 
 export const TokenKey = 'mx-token'
 
-/**
- * 带了 bearer
- */
 export function getToken(): string | null {
-  const token = Cookies.get(TokenKey)
+  // FUCK clerk constants not export, and mark it internal and can not custom
+  // packages/backend/src/constants.ts
+  const clerkJwt = Cookies.get('__session')
+
+  const token = Cookies.get(TokenKey) || clerkJwt
+
   return token || null
 }
 

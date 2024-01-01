@@ -17,9 +17,9 @@ import type { FC, ReactNode } from 'react'
 
 import { LazyLoad } from '~/components/common/Lazyload'
 import { useIsUnMounted } from '~/hooks/common/use-is-unmounted'
-import { calculateDimensions } from '~/lib/calc-image'
 import { isDev } from '~/lib/env'
 import { clsxm } from '~/lib/helper'
+import { calculateDimensions } from '~/lib/image'
 import { useMarkdownImageRecord } from '~/providers/article/MarkdownImageRecordProvider'
 
 import { Divider } from '../divider'
@@ -35,6 +35,9 @@ type TImageProps = {
 type BaseImageProps = {
   zoom?: boolean
   placeholder?: ReactNode
+
+  height?: number
+  width?: number
 }
 
 export enum ImageLoadStatus {
@@ -63,6 +66,8 @@ export const ImageLazy: Component<TImageProps & BaseImageProps> = ({
   zoom,
 
   placeholder,
+  height,
+  width,
 }) => {
   // @ts-ignore
   const [zoomer_] = useState(() => {
@@ -125,6 +130,8 @@ export const ImageLazy: Component<TImageProps & BaseImageProps> = ({
             </div>
           )}
           <OptimizedImage
+            height={height}
+            width={width}
             src={src}
             title={title}
             alt={alt || title || ''}
@@ -137,7 +144,7 @@ export const ImageLazy: Component<TImageProps & BaseImageProps> = ({
               status: imageLoadStatus,
               className: imageStyles[ImageLoadStatus.Loaded],
             })}
-            onAnimationEnd={(e) => {
+            onAnimationEnd={(e: Event) => {
               if (ImageLoadStatus.Loaded) {
                 ;(e.target as HTMLElement).classList.remove(
                   imageStyles[ImageLoadStatus.Loaded],
@@ -172,15 +179,25 @@ interface FixedImageProps extends TImageProps {
 }
 export const FixedZoomedImage: Component<FixedImageProps> = (props) => {
   const placeholder = useMemo(() => {
-    return <Placeholder containerWidth={props.containerWidth} src={props.src} />
-  }, [props.containerWidth, props.src])
+    return <Placeholder {...props} />
+  }, [props])
   return <ImageLazy zoom placeholder={placeholder} {...props} />
 }
 
 const Placeholder: FC<
-  Pick<FixedImageProps, 'src' | 'containerWidth' | 'height' | 'width'>
-> = ({ src, containerWidth, height: manualHeight, width: manualWidth }) => {
+  Pick<
+    FixedImageProps,
+    'src' | 'containerWidth' | 'height' | 'width' | 'accent'
+  >
+> = ({
+  src,
+  containerWidth,
+  height: manualHeight,
+  width: manualWidth,
+  accent,
+}) => {
   const imageMeta = useMarkdownImageRecord(src)
+  const accentColor = accent || imageMeta?.accent
 
   const scaledSize = useMemo(() => {
     let nextHeight = manualHeight
@@ -210,7 +227,7 @@ const Placeholder: FC<
     }
   }, [manualHeight, manualWidth, containerWidth, imageMeta])
 
-  if (!scaledSize) return <NoFixedPlaceholder accent={imageMeta?.accent} />
+  if (!scaledSize) return <NoFixedPlaceholder accent={accentColor} />
 
   return (
     <span
@@ -223,7 +240,7 @@ const Placeholder: FC<
       style={{
         height: scaledSize.scaleHeight,
         width: scaledSize.scaleWidth,
-        backgroundColor: imageMeta?.accent,
+        backgroundColor: accentColor,
       }}
     />
   )
@@ -245,34 +262,21 @@ const NoFixedPlaceholder = ({ accent }: { accent?: string }) => {
   )
 }
 
-// @ts-expect-error
-const OptimizedImage: FC<React.JSX.IntrinsicElements['img']> = forwardRef(
-  (
-    {
-      src,
-      alt,
-      placeholder,
-
-      ...rest
-    },
-    ref,
-  ) => {
-    const { height, width } = useMarkdownImageRecord(src!) || {}
-    if (!height || !width)
-      return <img alt={alt} src={src} ref={ref} {...rest} />
-    return (
-      <Image
-        alt={alt || ''}
-        fetchPriority="high"
-        priority
-        src={src!}
-        {...rest}
-        height={height}
-        width={width}
-        ref={ref as any}
-      />
-    )
-  },
-)
+const OptimizedImage: FC<any> = forwardRef(({ src, alt, ...rest }, ref) => {
+  const { height, width } = useMarkdownImageRecord(src!) || rest
+  if (!height || !width) return <img alt={alt} src={src} ref={ref} {...rest} />
+  return (
+    <Image
+      alt={alt || ''}
+      fetchPriority="high"
+      priority
+      src={src!}
+      {...rest}
+      height={+height}
+      width={+width}
+      ref={ref as any}
+    />
+  )
+})
 
 OptimizedImage.displayName = 'OptimizedImage'
