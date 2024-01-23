@@ -3,11 +3,12 @@
 import React, { useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 import { useSignIn, useUser } from '@clerk/nextjs'
 
-import { refreshToken, useIsLogged, useResolveAdminUrl } from '~/atoms'
+import { refreshToken, useIsLogged } from '~/atoms'
 import { UserArrowLeftIcon } from '~/components/icons/user-arrow-left'
 import { MotionButtonBase } from '~/components/ui/button'
 import { FloatPopover } from '~/components/ui/float-popover'
@@ -35,16 +36,22 @@ const SignInButton = dynamic(() =>
 
 const OwnerAvatar = () => {
   const ownerAvatar = useAggregationSelector((s) => s.user.avatar)!
-  const resolveAdminUrl = useResolveAdminUrl()
+
   return (
     <MotionButtonBase
       onClick={() => {
-        window.open(resolveAdminUrl(), '_blank')
+        window.open('/dashboard', '_blank')
       }}
-      className="pointer-events-auto relative flex h-10 w-10 items-center justify-center"
+      className="pointer-events-auto relative flex items-center justify-center"
     >
       <span className="sr-only">Go to dashboard</span>
-      <img className="rounded-full" src={ownerAvatar} alt="site owner" />
+      <Image
+        className="rounded-full"
+        height={36}
+        width={36}
+        src={ownerAvatar}
+        alt="site owner"
+      />
       <UserAuthFromIcon className="absolute -bottom-1 -right-1" />
     </MotionButtonBase>
   )

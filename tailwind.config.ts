@@ -1,8 +1,7 @@
 import daisyui from 'daisyui'
 import { withTV } from 'tailwind-variants/transformer'
-import twColors from 'tailwindcss/colors'
 import type { Config } from 'tailwindcss'
-import type { PluginAPI } from 'tailwindcss/types/config'
+import type { CSSRuleObject, PluginAPI } from 'tailwindcss/types/config'
 
 import { addDynamicIconSelectors } from '@iconify/tailwind'
 import typography from '@tailwindcss/typography'
@@ -189,10 +188,11 @@ const twConfig: Config = {
     'group-hover:opacity-100',
     'transition-opacity',
     'group-hover:animation-blink',
+
+    '!w-full',
+    'w-full',
   ],
   theme: {
-    // colors: createVariableColors(twColors),
-
     extend: {
       fontFamily: {
         sans: 'var(--font-sans),system-ui,-apple-system,PingFang SC,"Microsoft YaHei",Segoe UI,Roboto,Helvetica,noto sans sc,hiragino sans gb,"sans-serif",Apple Color Emoji,Segoe UI Emoji,Not Color Emoji',
@@ -222,7 +222,6 @@ const twConfig: Config = {
 
       colors: {
         uk: UIKitColors,
-        always: { ...twColors },
 
         themed: {
           bg_opacity: 'var(--bg-opacity)',
@@ -301,7 +300,7 @@ const twConfig: Config = {
 }
 
 function addShortcutPlugin({ addUtilities }: PluginAPI) {
-  const styles = {
+  const styles: CSSRuleObject = {
     '.content-auto': {
       'content-visibility': 'auto',
     },
@@ -321,6 +320,12 @@ function addShortcutPlugin({ addUtilities }: PluginAPI) {
     },
     '.fill-content': {
       'min-height': `calc(100vh - 17.5rem)`,
+    },
+    '.card-shadow': {
+      'box-shadow': '0 0 0 1px rgba(0,0,0,.08),0 4px 6px rgba(0,0,0,.04)',
+    },
+    '.card-shadow:hover': {
+      'box-shadow': '0 0 0 1px rgba(0,0,0,.08),0 6px 14px rgba(0,0,0,.08)',
     },
   }
   addUtilities(styles)

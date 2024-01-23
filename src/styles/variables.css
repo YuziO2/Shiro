@@ -2,7 +2,7 @@ html {
   --border-color: #eee;
   --font-sans: theme('fontFamily.sans');
   --theme-color: var(--auto-theme-color, theme('colors.accent'));
-  --hover-color: var(--auto-hover-color, theme('colors.accent-focus'));
+  --hover-color: var(--auto-hover-color, theme('colors.accent/80'));
   --header-height: auto;
   /* Accent color for form controls */
   accent-color: var(--theme-color);
@@ -16,6 +16,11 @@ html {
   font-family: var(--font-sans);
 }
 
+a,
+details summary {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
 :root {
   --bg-opacity: rgba(255, 255, 255, 0.72);
 }
@@ -26,7 +31,7 @@ html {
 
 ::selection {
   background-color: var(--theme-color) !important;
-  color: theme(colors.always.white) !important;
+  color: theme(colors.white) !important;
   text-shadow: none;
 }
 

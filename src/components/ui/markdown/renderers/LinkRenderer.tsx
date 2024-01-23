@@ -13,18 +13,20 @@ import {
   isGithubRepoUrl,
   isGithubUrl,
   isSelfArticleUrl,
+  isTMDBUrl,
   isTweetUrl,
   isYoutubeUrl,
   parseGithubGistUrl,
   parseGithubPrUrl,
   parseGithubTypedUrl,
 } from '~/lib/link-parser'
+import { useFeatureEnabled } from '~/providers/root/app-feature-provider'
 
-import { EmbedGithubFile } from '../../../widgets/shared/EmbedGithubFile'
+import { EmbedGithubFile } from '../../../modules/shared/EmbedGithubFile'
 import { LinkCard, LinkCardSource } from '../../link-card'
 import { MLink } from '../../link/MLink'
 
-const Tweet = dynamic(() => import('~/components/widgets/shared/Tweet'), {
+const Tweet = dynamic(() => import('~/components/modules/shared/Tweet'), {
   ssr: false,
 })
 
@@ -51,6 +53,8 @@ export const BlockLinkRenderer = ({
     ),
     [children, href],
   )
+
+  const tmdbEnabled = useFeatureEnabled('tmdb')
 
   if (!url) {
     return fallbackElement
@@ -104,13 +108,25 @@ export const BlockLinkRenderer = ({
     }
     case isSelfArticleUrl(url): {
       return (
-        <LinkCard source={LinkCardSource.Self} id={url.pathname.slice(1)} />
+        <LinkCard
+          fallbackUrl={url.toString()}
+          source={LinkCardSource.Self}
+          id={url.pathname.slice(1)}
+        />
       )
     }
-
-    default:
-      return fallbackElement
+    case isTMDBUrl(url): {
+      if (tmdbEnabled)
+        return (
+          <LinkCard
+            fallbackUrl={url.toString()}
+            source={LinkCardSource.TMDB}
+            id={url.pathname.slice(1)}
+          />
+        )
+    }
   }
+  return fallbackElement
 }
 
 const FixedRatioContainer = ({
@@ -172,7 +188,11 @@ const GithubUrlRenderL: FC<{
     case isGithubPrUrl(url): {
       const { owner, repo, pr } = parseGithubPrUrl(url)
       return (
-        <LinkCard id={`${owner}/${repo}/${pr}`} source={LinkCardSource.GHPr} />
+        <LinkCard
+          fallbackUrl={url.toString()}
+          id={`${owner}/${repo}/${pr}`}
+          source={LinkCardSource.GHPr}
+        />
       )
     }
 
@@ -184,6 +204,7 @@ const GithubUrlRenderL: FC<{
             <MLink href={href}>{href}</MLink>
           </p>
           <LinkCard
+            fallbackUrl={url.toString()}
             id={`${owner}/${repo}/commit/${id}`}
             source={LinkCardSource.GHCommit}
           />
