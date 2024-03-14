@@ -19,6 +19,7 @@ import { MainLayout } from '~/components/modules/dashboard/layouts'
 import { AccentColorStyleInjector } from '~/components/modules/shared/AccentColorStyleInjector'
 import { FABContainer } from '~/components/ui/fab'
 
+export const dynamic = 'force-dynamic'
 export function generateViewport(): Viewport {
   return {
     themeColor: [
@@ -79,7 +80,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             <FABContainer />
           </ClientOnly>
         </DashboardAppProviders>
-        <ToastContainer stacked />
+        <ToastContainer />
       </body>
     </html>
   )

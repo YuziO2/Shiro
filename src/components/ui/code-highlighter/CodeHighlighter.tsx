@@ -1,8 +1,14 @@
-import React, { useCallback, useInsertionEffect, useRef } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useInsertionEffect,
+  useRef,
+} from 'react'
 import type { FC } from 'react'
 
 import { useIsPrintMode } from '~/atoms/css-media'
 import { useIsDark } from '~/hooks/common/use-is-dark'
+import { clsxm } from '~/lib/helper'
 import { loadScript, loadStyleSheet } from '~/lib/load-script'
 import { toast } from '~/lib/toast'
 
@@ -19,7 +25,7 @@ interface Props {
   content: string
 }
 
-export const HighLighter: FC<Props> = (props) => {
+export const HighLighterPrismCdn: FC<Props> = (props) => {
   const { lang: language, content: value } = props
 
   const handleCopy = useCallback(() => {
@@ -27,6 +33,58 @@ export const HighLighter: FC<Props> = (props) => {
     toast.success('COPIED!')
   }, [value])
 
+  const ref = useRef<HTMLElement>(null)
+  useLoadHighlighter(ref)
+  return (
+    <div className={styles['code-wrap']}>
+      <span className={styles['language-tip']} aria-hidden>
+        {language?.toUpperCase()}
+      </span>
+
+      <pre className="line-numbers !bg-transparent" data-start="1">
+        <code
+          className={`language-${language ?? 'markup'} !bg-transparent`}
+          ref={ref}
+        >
+          {value}
+        </code>
+      </pre>
+
+      <div className={styles['copy-tip']} onClick={handleCopy} aria-hidden>
+        Copy
+      </div>
+    </div>
+  )
+}
+
+export const BaseCodeHighlighter: Component<
+  Props & {
+    style: React.CSSProperties
+  }
+> = ({ content, lang, className, style }) => {
+  const ref = useRef<HTMLElement>(null)
+  useLoadHighlighter(ref)
+
+  useEffect(() => {
+    window.Prism?.highlightElement(ref.current)
+  }, [content, lang])
+  return (
+    <pre
+      className={clsxm('!bg-transparent', className)}
+      style={style}
+      data-start="1"
+    >
+      <code
+        className={`language-${lang ?? 'markup'} !bg-transparent`}
+        ref={ref}
+      >
+        {content}
+      </code>
+    </pre>
+  )
+}
+
+const useLoadHighlighter = (ref: React.RefObject<HTMLElement>) => {
   const prevThemeCSS = useRef<ReturnType<typeof loadStyleSheet>>()
   const isPrintMode = useIsPrintMode()
   const isDark = useIsDark()
@@ -78,9 +136,6 @@ export const HighLighter: FC<Props> = (props) => {
           })
         } else {
           requestAnimationFrame(() => {
-            window.Prism?.highlightAll()
-            // highlightAll twice
-
             requestAnimationFrame(() => {
               window.Prism?.highlightAll()
             })
@@ -88,26 +143,4 @@ export const HighLighter: FC<Props> = (props) => {
         }
       })
   }, [])
-
-  const ref = useRef<HTMLElement>(null)
-  return (
-    <div className={styles['code-wrap']}>
-      <span className={styles['language-tip']} aria-hidden>
-        {language?.toUpperCase()}
-      </span>
-
-      <pre className="line-numbers !bg-transparent" data-start="1">
-        <code
-          className={`language-${language ?? 'markup'} !bg-transparent`}
-          ref={ref}
-        >
-          {value}
-        </code>
-      </pre>
-
-      <div className={styles['copy-tip']} onClick={handleCopy} aria-hidden>
-        Copy
-      </div>
-    </div>
-  )
 }

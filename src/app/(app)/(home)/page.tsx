@@ -23,9 +23,9 @@ import {
   softBouncePreset,
   softSpringPreset,
 } from '~/constants/spring'
-import { shuffle } from '~/lib/_'
 import { isDev } from '~/lib/env'
 import { clsxm } from '~/lib/helper'
+import { shuffle } from '~/lib/lodash'
 import { noopObj } from '~/lib/noop'
 import { apiClient } from '~/lib/request'
 import { routeBuilder, Routes } from '~/lib/route-builder'
@@ -53,7 +53,7 @@ const Screen = forwardRef<
       ref={ref}
       style={isDev ? debugStyle : undefined}
       className={clsxm(
-        'relative flex h-screen min-h-[900px] flex-col center',
+        'relative flex h-screen min-h-[900px] flex-col overflow-hidden center',
         props.className,
       )}
     >
@@ -67,7 +67,7 @@ Screen.displayName = 'Screen'
 export default function Home() {
   return (
     <div>
-      <Welcome />
+      <Hero />
 
       <PostScreen />
 
@@ -90,7 +90,7 @@ const TwoColumnLayout = ({
   rightContainerClassName?: string
 }) => {
   return (
-    <div className="relative flex h-full w-full flex-col flex-wrap items-center lg:flex-row">
+    <div className="relative flex h-full w-full max-w-[1800px] flex-col flex-wrap items-center lg:flex-row">
       {children.slice(0, 2).map((child, i) => {
         return (
           <div
@@ -111,7 +111,7 @@ const TwoColumnLayout = ({
   )
 }
 
-const Welcome = () => {
+const Hero = () => {
   const { title, description } = useAppConfigSelector((config) => {
     return {
       ...config.hero,
@@ -164,7 +164,7 @@ const Welcome = () => {
             <span className="opacity-80">{description}</span>
           </BottomToUpTransitionView>
 
-          <ul className="mt-8 flex space-x-4 center lg:mt-[7rem] lg:block">
+          <ul className="mt-8 flex flex-wrap gap-4 center lg:mt-[7rem] lg:justify-start">
             {Object.entries(socialIds || noopObj).map(
               ([type, id]: any, index) => {
                 if (!isSupportIcon(type)) return null
@@ -222,6 +222,7 @@ const Welcome = () => {
 
 const PostScreen = () => {
   const { posts } = useHomeQueryData()
+
   return (
     <Screen className="h-fit min-h-[120vh]">
       <TwoColumnLayout leftContainerClassName="h-[30rem] lg:h-1/2">
@@ -237,9 +238,7 @@ const PostScreen = () => {
           transition={softSpringPreset}
           className="text-3xl font-medium leading-loose"
         >
-          这里或许有那么一些对于生活的感慨
-          <br />
-          也或许有那么一些对于技术的记录。
+          这里记录着对技术的洞察与创新，是追求未来无限可能的见证。
         </m.h2>
         <div>
           <ul className="space-y-4">

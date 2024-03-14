@@ -9,7 +9,6 @@ import { LazyMotion } from 'framer-motion'
 import { ThemeProvider } from 'next-themes'
 import type { PropsWithChildren } from 'react'
 
-import { PeekPortal } from '~/components/modules/peek/PeekPortal'
 import { ModalStackProvider } from '~/components/ui/modal'
 import { useBeforeUnload } from '~/hooks/common/use-before-unload'
 
@@ -27,7 +26,6 @@ const loadFeatures = () =>
 
 const baseContexts: JSX.Element[] = [
   <ThemeProvider key="themeProvider" />,
-
   <JotaiStoreProvider key="jotaiStoreProvider" />,
 
   <BalancerProvider key="balancerProvider" />,
@@ -40,20 +38,18 @@ const webappContexts: JSX.Element[] = baseContexts.concat(
 
 export function WebAppProviders({ children }: PropsWithChildren) {
   return (
-    <>
-      <ProviderComposer contexts={webappContexts}>
-        {children}
-        <PeekPortal />
-        <SocketContainer />
-        <ModalStackProvider key="modalStackProvider" />
-        <EventProvider key="viewportProvider" />
-        {/* <SentryProvider key="SentryProvider" /> */}
-        <PageScrollInfoProvider key="PageScrollInfoProvider" />
-        <DebugProvider key="debugProvider" />
+    <ProviderComposer contexts={webappContexts}>
+      {children}
 
-        <ScriptInjectProvider />
-      </ProviderComposer>
-    </>
+      <SocketContainer />
+      <ModalStackProvider key="modalStackProvider" />
+      <EventProvider key="viewportProvider" />
+      {/* <SentryProvider key="SentryProvider" /> */}
+      <PageScrollInfoProvider key="PageScrollInfoProvider" />
+      <DebugProvider key="debugProvider" />
+
+      <ScriptInjectProvider />
+    </ProviderComposer>
   )
 }
 const dashboardContexts: JSX.Element[] = baseContexts.concat(
@@ -63,15 +59,13 @@ const dashboardContexts: JSX.Element[] = baseContexts.concat(
 )
 export function DashboardAppProviders({ children }: PropsWithChildren) {
   return (
-    <>
-      <ProviderComposer contexts={dashboardContexts}>
-        {children}
+    <ProviderComposer contexts={dashboardContexts}>
+      {children}
 
-        <ModalStackProvider key="modalStackProvider" />
-        <EventProvider key="viewportProvider" />
+      <ModalStackProvider key="modalStackProvider" />
+      <EventProvider key="viewportProvider" />
 
-        <DebugProvider key="debugProvider" />
-      </ProviderComposer>
-    </>
+      {/* <DebugProvider key="debugProvider" /> */}
+    </ProviderComposer>
   )
 }

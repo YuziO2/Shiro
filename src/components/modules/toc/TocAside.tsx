@@ -8,11 +8,11 @@ import React, {
   useMemo,
   useRef,
 } from 'react'
-import { useForceUpdate } from 'framer-motion'
 
 import { DOMCustomEvents } from '~/constants/event'
-import { throttle } from '~/lib/_'
+import { useForceUpdate } from '~/hooks/common/use-force-update'
 import { clsxm } from '~/lib/helper'
+import { throttle } from '~/lib/lodash'
 import { useWrappedElement } from '~/providers/shared/WrappedElementProvider'
 
 import { TocTree } from './TocTree'
@@ -65,9 +65,13 @@ export const TocAside = forwardRef<
       if (!$article) {
         return []
       }
-      return [
-        ...$article.querySelectorAll('h1,h2,h3,h4,h5,h6'),
-      ] as HTMLHeadingElement[]
+      return [...$article.querySelectorAll('h1,h2,h3,h4,h5,h6')].filter(
+        ($heading) => {
+          if (($heading as HTMLElement).dataset['markdownHeading'] === 'true')
+            return true
+          return false
+        },
+      ) as HTMLHeadingElement[]
     }, [$article, updated])
 
     useEffect(() => {

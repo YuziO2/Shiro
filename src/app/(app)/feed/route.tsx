@@ -19,8 +19,8 @@ import { escapeXml } from '~/lib/helper.server'
 import { getQueryClient } from '~/lib/query-client.server'
 import { apiClient } from '~/lib/request'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 60 * 10 // 10 min
+// export const dynamic = 'force-dynamic'
+export const revalidate = 86400 // 1 day
 
 interface RSSProps {
   title: string
@@ -105,6 +105,26 @@ ${ReactDOM.renderToString(
           return <img src={src} alt={alt} />
         },
       },
+      extendsRules: {
+        codeBlock: {
+          react(node, output, state) {
+            if (
+              node.lang === 'mermaid' ||
+              node.lang === 'excalidraw' ||
+              node.lang === 'component'
+            ) {
+              return <NotSupportRender />
+            }
+            return (
+              <pre key={state.key}>
+                <code className={node.lang ? `lang-${node.lang}` : ''}>
+                  {node.content}
+                </code>
+              </pre>
+            )
+          },
+        },
+      },
       additionalParserRules: {
         spoilder: SpoilerRule,
         mention: MentionRule,
@@ -135,11 +155,25 @@ ${ReactDOM.renderToString(
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/xml',
+      'Cache-Control': 'max-age=60, s-maxage=86400',
+      'CDN-Cache-Control': 'max-age=86400',
+      'Vercel-CDN-Cache-Control': 'max-age=86400',
     },
   })
 }
 
-const NotSupportRender = () => <div>这个内容只能在原文中查看哦</div>
+const NotSupportRender = () => (
+  <blockquote
+    style={{
+      textAlign: 'center',
+      margin: '1rem 0',
+      backgroundColor: '#f5f5f5',
+      borderRadius: '0.5rem',
+    }}
+  >
+    <em>这个内容只能在原文中查看哦</em>
+  </blockquote>
+)
 
 const ALERT_BLOCKQUOTE_R =
   /^(> \[!(?<type>NOTE|IMPORTANT|WARNING)\].*?)(?<body>(?:\n *>.*?)*)(?=\n{2,}|$)/

@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import type { NoteDto } from '~/models/writing'
 import type { FC } from 'react'
 
-import { useIsMobile } from '~/atoms'
+import { useIsMobile } from '~/atoms/hooks'
 import { PageLoading } from '~/components/layout/dashboard/PageLoading'
 import {
   NoteEditorSidebar,
@@ -29,11 +29,12 @@ import {
   useEditorRef,
   Writing,
 } from '~/components/modules/dashboard/writing/Writing'
-import { LoadingButtonWrapper, StyledButton } from '~/components/ui/button'
+import { StyledButton } from '~/components/ui/button'
 import { PublishEvent, WriteEditEvent } from '~/events'
+import { useRefetchData } from '~/hooks/biz/use-refetch-data'
 import { useEventCallback } from '~/hooks/common/use-event-callback'
-import { cloneDeep } from '~/lib/_'
 import { dayOfYear } from '~/lib/datetime'
+import { cloneDeep } from '~/lib/lodash'
 import { toast } from '~/lib/toast'
 import { adminQueries } from '~/queries/definition'
 import { useCreateNote, useUpdateNote } from '~/queries/definition/note'
@@ -42,15 +43,17 @@ export default function Page() {
   const search = useSearchParams()
   const id = search.get('id')
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     ...adminQueries.note.getNote(id!),
     enabled: !!id,
   })
 
+  const [key] = useRefetchData(refetch)
+
   if (id) {
     if (isLoading) return <PageLoading />
 
-    return <EditPage initialData={data} />
+    return <EditPage initialData={data} key={key} />
   }
   return <EditPage />
 }
@@ -179,53 +182,53 @@ const ActionButtonGroup = ({ initialData }: { initialData?: NoteDto }) => {
             }}
           />
         </div>
-        <LoadingButtonWrapper isLoading={isPending}>
-          <StyledButton
-            onClick={() => {
-              const currentData = {
-                ...getData(),
-              }
 
-              const payload: NoteDto & {
-                id?: string
-              } = {
-                ...currentData,
-              }
+        <StyledButton
+          isLoading={isPending}
+          onClick={() => {
+            const currentData = {
+              ...getData(),
+            }
 
-              // if (
-              //   currentData.created === initialData?.created &&
-              //   currentData.created
-              // ) {
-              //   payload.custom_created = new Date(currentData.created)
-              // }
+            const payload: NoteDto & {
+              id?: string
+            } = {
+              ...currentData,
+            }
 
-              Reflect.deleteProperty(currentData, 'category')
+            // if (
+            //   currentData.created === initialData?.created &&
+            //   currentData.created
+            // ) {
+            //   payload.custom_created = new Date(currentData.created)
+            // }
 
-              const isCreate = !currentData.id
-              const promise = isCreate
-                ? createNote(payload).then((res) => {
-                    router.replace(`/dashboard/notes/edit?id=${res.id}`)
+            Reflect.deleteProperty(currentData, 'category')
 
-                    return res
-                  })
-                : updateNote(payload)
-              promise
-                .then((res) => {
-                  window.dispatchEvent(
-                    new PublishEvent({
-                      ...payload,
-                      id: res.id,
-                    }),
-                  )
+            const isCreate = !currentData.id
+            const promise = isCreate
+              ? createNote(payload).then((res) => {
+                  router.replace(`/dashboard/notes/edit?id=${res.id}`)
+
+                  return res
                 })
-                .catch((err) => {
-                  toast.error(err.message)
-                })
-            }}
-          >
-            {initialData ? '保存' : '发布'}
-          </StyledButton>
-        </LoadingButtonWrapper>
+              : updateNote(payload)
+            promise
+              .then((res) => {
+                window.dispatchEvent(
+                  new PublishEvent({
+                    ...payload,
+                    id: res.id,
+                  }),
+                )
+              })
+              .catch((err) => {
+                toast.error(err.message)
+              })
+          }}
+        >
+          {initialData ? '保存' : '发布'}
+        </StyledButton>
       </div>
     </>
   )

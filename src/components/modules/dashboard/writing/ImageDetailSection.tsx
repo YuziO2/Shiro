@@ -9,8 +9,8 @@ import { Divider } from '~/components/ui/divider'
 import { AdvancedInput, AdvancedInputProvider } from '~/components/ui/input'
 import { Label, LabelProvider } from '~/components/ui/label'
 import { useEventCallback } from '~/hooks/common/use-event-callback'
-import { uniqBy } from '~/lib/_'
 import { getDominantColor } from '~/lib/image'
+import { uniqBy } from '~/lib/lodash'
 import { toast } from '~/lib/toast'
 
 const pickImagesFromMarkdown = (text: string) => {
@@ -53,7 +53,9 @@ export const ImageDetailSection: FC<ImageDetailSectionProps> = (props) => {
   }, [images])
 
   const fromText = useMemo(() => {
-    return pickImagesFromMarkdown(text)
+    return pickImagesFromMarkdown(text).filter((src) => {
+      return src.startsWith('http')
+    })
   }, [text])
 
   const hasTopDivider = withDivider === 'top' || withDivider === 'both'

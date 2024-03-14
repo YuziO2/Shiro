@@ -8,7 +8,7 @@ import Markdown from 'markdown-to-jsx'
 import type { LinkModel } from '@mx-space/api-client'
 import type { FC } from 'react'
 
-import { LinkState, LinkType } from '@mx-space/api-client'
+import { LinkState, LinkType, RequestError } from '@mx-space/api-client'
 
 import { NotSupport } from '~/components/common/NotSupport'
 import { Avatar } from '~/components/ui/avatar'
@@ -17,13 +17,13 @@ import { Form, FormInput } from '~/components/ui/form'
 import { Loading } from '~/components/ui/loading'
 import { useModalStack } from '~/components/ui/modal'
 import { BottomToUpTransitionView } from '~/components/ui/transition/BottomToUpTransitionView'
-import { shuffle } from '~/lib/_'
-import { apiClient } from '~/lib/request'
+import { shuffle } from '~/lib/lodash'
+import { apiClient, getErrorMessageFromRequestError } from '~/lib/request'
 import { toast } from '~/lib/toast'
 import { useAggregationSelector } from '~/providers/root/aggregation-data-provider'
 
 const renderTitle = (text: string) => {
-  return <h1 className="headline !mt-12 !text-xl">{text}</h1>
+  return <h1 className="headline !my-12 !text-xl">{text}</h1>
 }
 
 export default function Page() {
@@ -78,7 +78,7 @@ export default function Page() {
         <h3>海内存知己，天涯若比邻</h3>
       </header>
 
-      <main className="mt-10">
+      <main className="mt-10 flex w-full flex-col">
         {friends.length > 0 && (
           <>
             {collections.length !== 0 && renderTitle('我的朋友')}
@@ -116,7 +116,7 @@ type FriendSectionProps = {
 
 const FriendSection: FC<FriendSectionProps> = ({ data }) => {
   return (
-    <section className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
+    <section className="grid grid-cols-2 gap-6 md:grid-cols-3 2xl:grid-cols-3">
       {data.map((link) => {
         return (
           <BottomToUpTransitionView key={link.id} duration={50}>
@@ -165,7 +165,7 @@ const Card: FC<{ link: LinkModel }> = ({ link }) => {
         text={link.name[0]}
         alt={`Avatar of ${link.name}`}
         size={64}
-        className="ring-2 ring-gray-400/30 dark:ring-slate-50"
+        className="ring-2 ring-gray-400/30 dark:ring-zinc-50"
       />
       <span className="flex h-full flex-col items-center justify-center space-y-2 py-3">
         <span className="text-lg font-medium">{link.name}</span>
@@ -179,14 +179,21 @@ const Card: FC<{ link: LinkModel }> = ({ link }) => {
 
 const FavoriteSection: FC<FriendSectionProps> = ({ data }) => {
   return (
-    <ul>
+    <ul className="relative flex w-full flex-grow flex-col gap-4">
       {data.map((link) => {
         return (
-          <li key={link.id}>
-            <a href={link.url} target="_blank">
+          <li key={link.id} className="flex w-full items-end">
+            <a
+              href={link.url}
+              target="_blank"
+              className="flex-shrink-0 text-base leading-none"
+            >
               {link.name}
             </a>
-            <span className="meta">{link.description || ''}</span>
+
+            <span className="ml-2 h-[12px] max-w-full truncate break-all text-xs leading-none text-base-content/80">
+              {link.description || ''}
+            </span>
           </li>
         )
       })}
@@ -236,6 +243,7 @@ const ApplyLinkInfo: FC = () => {
     queryKey: ['can-apply'],
     queryFn: () => apiClient.link.canApplyLink(),
     initialData: true,
+    refetchOnMount: 'always',
   })
   const { present } = useModalStack()
   if (!canApply) {
@@ -384,20 +392,31 @@ const FormModal = () => {
     (e: any) => {
       e.preventDefault()
 
-      apiClient.link.applyLink({ ...state }).then(() => {
-        dismissTop()
-        toast.success('好耶！')
-      })
+      apiClient.link
+        .applyLink({ ...state })
+        .then(() => {
+          dismissTop()
+          toast.success('好耶！')
+        })
+        .catch((err) => {
+          if (err instanceof RequestError)
+            toast.error(getErrorMessageFromRequestError(err))
+          else {
+            toast.error(err.message)
+          }
+        })
     },
     [state],
   )
   return (
-    <Form className="w-[300px] space-y-4 text-center" onSubmit={handleSubmit}>
+    <Form
+      className="w-full space-y-4 text-center lg:w-[300px]"
+      onSubmit={handleSubmit}
+    >
       {inputs.map((input) => (
         <FormInput
           key={input.name}
-          // @ts-expect-error
-          value={state[input.name]}
+          value={(state as any)[input.name]}
           onChange={handleChange}
           {...input}
         />

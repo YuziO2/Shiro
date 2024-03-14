@@ -1,3 +1,4 @@
+import path from 'path'
 import { config } from 'dotenv'
 
 import NextBundleAnalyzer from '@next/bundle-analyzer'
@@ -10,8 +11,8 @@ const isProd = process.env.NODE_ENV === 'production'
 /** @type {import('next').NextConfig} */
 // eslint-disable-next-line import/no-mutable-exports
 let nextConfig = {
-  reactStrictMode: false,
-  productionBrowserSourceMaps: true,
+  reactStrictMode: true,
+  productionBrowserSourceMaps: false,
   output: 'standalone',
   assetPrefix: isProd ? env.ASSETPREFIX || undefined : undefined,
   compiler: {
@@ -47,11 +48,23 @@ let nextConfig = {
     }
   },
 
-  webpack: (config, options) => {
+  webpack: (config, { webpack }) => {
+    const __dirname = new URL('./', import.meta.url).pathname
+    config.resolve.alias['jotai'] = path.resolve(
+      __dirname,
+      'node_modules/jotai',
+    )
+
     config.externals.push({
       'utf-8-validate': 'commonjs utf-8-validate',
       bufferutil: 'commonjs bufferutil',
     })
+
+    // config.plugins.push(
+    //   new webpack.optimize.MinChunkSizePlugin({
+    //     minChunkSize: 1024 * 100, // Minimum number of characters
+    //   }),
+    // )
 
     // if (
     //   process.env.SENTRY === 'true' &&
