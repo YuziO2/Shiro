@@ -1,6 +1,6 @@
 .comment__message {
   * {
-    @apply break-all leading-6;
+    @apply break-words leading-6;
   }
 
   h1,
@@ -35,26 +35,31 @@
   }
 
   blockquote {
-    @apply my-1 border-l-4 border-zinc-400 pl-2;
+    @apply pl-3;
+    @apply relative mb-2 border-0 text-base-content/60;
+
+    &::before {
+      content: '';
+      display: block;
+      width: 3px;
+      bottom: 5px;
+      position: absolute;
+      left: 0;
+      top: 5px;
+      border-radius: 24px;
+      background-color: theme(colors.accent);
+    }
   }
 
   img,
   video {
-    @apply rounded-md;
+    @apply my-2 rounded-md;
+
     max-height: 350px;
   }
 
-  pre {
-    @apply my-1.5 whitespace-break-spaces;
-  }
-
-  pre,
-  code:not([class^='language-']) {
-    @apply rounded bg-zinc-700/10 px-1 py-0.5 text-zinc-900;
-  }
-
-  pre > code {
-    @apply bg-transparent px-0 py-0 !important;
+  :global(.shiki-block) {
+    @apply my-1;
   }
 }
 
@@ -65,14 +70,5 @@
 
   blockquote {
     @apply border-zinc-50/50;
-  }
-
-  pre,
-  code:not([class^='language-']) {
-    @apply bg-zinc-200/20 text-zinc-50;
-  }
-
-  pre > code {
-    @apply bg-transparent !important;
   }
 }

@@ -6,7 +6,7 @@ import {
 } from './react-query-provider'
 import { LazyMotion } from 'framer-motion'
 import { ThemeProvider } from 'next-themes'
-import type { PropsWithChildren } from 'react'
+import type { JSX, PropsWithChildren } from 'react'
 
 import { PeekPortal } from '~/components/modules/peek/PeekPortal'
 import { ModalStackProvider } from '~/components/ui/modal'
@@ -24,6 +24,7 @@ const loadFeatures = () =>
   import('./framer-lazy-feature').then((res) => res.default)
 
 const baseContexts: JSX.Element[] = [
+  // @ts-expect-error
   <ThemeProvider key="themeProvider" />,
   <JotaiStoreProvider key="jotaiStoreProvider" />,
 

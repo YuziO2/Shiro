@@ -1,10 +1,14 @@
-import React, {
+import type React from 'react'
+import {
+  use,
   useCallback,
   useEffect,
   useInsertionEffect,
+  useMemo,
   useRef,
 } from 'react'
 import type { FC } from 'react'
+import type { ShikiProps } from './shiki/Shiki'
 
 import { useIsPrintMode } from '~/atoms/css-media'
 import { useIsDark } from '~/hooks/common/use-is-dark'
@@ -14,6 +18,7 @@ import { loadScript, loadStyleSheet } from '~/lib/load-script'
 import { toast } from '~/lib/toast'
 
 import styles from './CodeHighlighter.module.css'
+import { ShikiHighLighter } from './shiki/Shiki'
 
 declare global {
   interface Window {
@@ -86,7 +91,7 @@ export const BaseCodeHighlighter: Component<
   )
 }
 
-const useLoadHighlighter = (ref: React.RefObject<HTMLElement>) => {
+const useLoadHighlighter = (ref: React.RefObject<HTMLElement | null>) => {
   const prevThemeCSS = useRef<ReturnType<typeof loadStyleSheet>>()
   const isPrintMode = useIsPrintMode()
   const isDark = useIsDark()
@@ -145,4 +150,25 @@ const useLoadHighlighter = (ref: React.RefObject<HTMLElement>) => {
         }
       })
   }, [])
+}
+let bundledLanguagesKeysSet: Set<string> | null = null
+export const ShikiFallback: FC<ShikiProps> = (props) => {
+  const { lang } = props
+  const shikiSupported = use(
+    useMemo(async () => {
+      if (!lang) return false
+
+      if (!bundledLanguagesKeysSet) {
+        const { bundledLanguages } = await import('shiki/langs')
+        bundledLanguagesKeysSet = new Set(Object.keys(bundledLanguages))
+      }
+
+      return bundledLanguagesKeysSet.has(lang)
+    }, [lang]),
+  )
+
+  if (!shikiSupported) {
+    return <HighLighterPrismCdn {...props} />
+  }
+  return <ShikiHighLighter {...props} />
 }

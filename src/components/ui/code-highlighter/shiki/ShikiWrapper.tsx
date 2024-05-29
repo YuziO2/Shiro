@@ -4,9 +4,12 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import clsx from 'clsx'
+import { AnimatePresence, m } from 'framer-motion'
+import type { Variants } from 'framer-motion'
 import type { PropsWithChildren } from 'react'
 
 import { getViewport } from '~/atoms/hooks'
@@ -14,7 +17,6 @@ import { AutoResizeHeight } from '~/components/modules/shared/AutoResizeHeight'
 import { useMaskScrollArea } from '~/hooks/shared/use-mask-scrollarea'
 import { stopPropagation } from '~/lib/dom'
 import { clsxm } from '~/lib/helper'
-import { toast } from '~/lib/toast'
 
 import { MotionButtonBase } from '../../button'
 import styles from './Shiki.module.css'
@@ -28,24 +30,57 @@ interface Props {
   renderedHTML?: string
 }
 
+const copyIconVariants: Variants = {
+  initial: {
+    opacity: 1,
+    scale: 1,
+  },
+  animate: {
+    opacity: 1,
+    scale: 1,
+  },
+  exit: {
+    opacity: 0,
+    scale: 0,
+  },
+}
 export const ShikiHighLighterWrapper = forwardRef<
   HTMLDivElement,
-  PropsWithChildren<Props>
+  PropsWithChildren<
+    Props & {
+      shouldCollapsed?: boolean
+    }
+  >
 >((props, ref) => {
-  const { lang: language, content: value, attrs } = props
+  const {
+    shouldCollapsed = true,
+    lang: language,
+    content: value,
+    attrs,
+  } = props
 
+  const [copied, setCopied] = useState(false)
+  const copiedTimerRef = useRef<any>()
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(value)
-    toast.success('已复制到剪贴板')
+    setCopied(true)
+
+    clearTimeout(copiedTimerRef.current)
+    copiedTimerRef.current = setTimeout(() => {
+      setCopied(false)
+    }, 2000)
   }, [value])
 
   const [codeBlockRef, setCodeBlockRef] = useState<HTMLDivElement | null>(null)
 
   useImperativeHandle(ref, () => codeBlockRef!)
 
-  const [isCollapsed, setIsCollapsed] = useState(true)
+  const [isCollapsed, setIsCollapsed] = useState(shouldCollapsed)
   const [isOverflow, setIsOverflow] = useState(false)
   useEffect(() => {
+    if (!shouldCollapsed) {
+      return
+    }
     const $el = codeBlockRef
 
     if (!$el) return
@@ -56,9 +91,19 @@ export const ShikiHighLighterWrapper = forwardRef<
     if ($elScrollHeight >= halfWindowHeight) {
       setIsOverflow(true)
 
-      $el.querySelector('.highlighted')?.scrollIntoView({
-        block: 'center',
-      })
+      const $hightlighted = $el.querySelector('.highlighted')
+      if ($hightlighted) {
+        const lineHeight = parseInt(
+          getComputedStyle($hightlighted).height || '0',
+          10,
+        )
+        const $code = $el.querySelector('pre > code')!
+        const childIndexInParent = Array.from($code.children).indexOf(
+          $hightlighted,
+        )
+
+        $el.scrollTop = lineHeight * childIndexInParent - $el.clientHeight / 2
+      }
     } else {
       setIsOverflow(false)
     }
@@ -76,7 +121,7 @@ export const ShikiHighLighterWrapper = forwardRef<
 
   return (
     <div
-      className={clsx(styles['code-card'], 'group')}
+      className={clsx(styles['code-card'], 'shiki-block group')}
       onCopy={stopPropagation}
     >
       {!!filename && (
@@ -91,7 +136,7 @@ export const ShikiHighLighterWrapper = forwardRef<
       {!filename && !!language && (
         <div
           aria-hidden
-          className="pointer-events-none absolute bottom-3 right-3 z-10 text-sm opacity-60"
+          className="pointer-events-none absolute bottom-3 right-3 z-[2] text-sm opacity-60"
         >
           {language.toUpperCase()}
         </div>
@@ -100,16 +145,31 @@ export const ShikiHighLighterWrapper = forwardRef<
         <MotionButtonBase
           onClick={handleCopy}
           className={clsx(
-            'absolute right-2 top-2 z-[1] flex text-xs center',
+            'center absolute right-2 top-2 z-[3] flex text-xs',
             'rounded-md border border-accent/5 bg-accent/80 p-1.5 text-white backdrop-blur duration-200',
             'opacity-0 group-hover:opacity-100',
             filename && '!top-12',
           )}
         >
-          <i className="icon-[mingcute--copy-2-fill] size-4" />
+          <AnimatePresence mode="wait">
+            {copied ? (
+              <m.i
+                key={'copied'}
+                className="icon-[mingcute--check-line] size-4"
+                {...copyIconVariants}
+              />
+            ) : (
+              <m.i
+                key={'copy'}
+                className="icon-[mingcute--copy-2-fill] size-4"
+                {...copyIconVariants}
+              />
+            )}
+          </AnimatePresence>
         </MotionButtonBase>
         <AutoResizeHeight spring className="relative">
           <div
+            onCopy={stopPropagation}
             ref={setCodeBlockRef}
             className={clsxm(
               'relative max-h-[50vh] w-full overflow-auto',
@@ -123,13 +183,15 @@ export const ShikiHighLighterWrapper = forwardRef<
                   : '1rem',
               } as any
             }
-            dangerouslySetInnerHTML={
-              props.renderedHTML
-                ? ({
-                    __html: props.renderedHTML,
-                  } as any)
-                : undefined
-            }
+            dangerouslySetInnerHTML={useMemo(
+              () =>
+                props.renderedHTML
+                  ? ({
+                      __html: props.renderedHTML,
+                    } as any)
+                  : undefined,
+              [props.renderedHTML],
+            )}
           >
             {props.children}
           </div>

@@ -12,6 +12,7 @@ import { FloatPopover } from '~/components/ui/float-popover'
 import { useModalStack } from '~/components/ui/modal'
 import { NumberSmoothTransition } from '~/components/ui/number-transition/NumberSmoothTransition'
 import { RelativeTime } from '~/components/ui/relative-time'
+import { useIsClient } from '~/hooks/common/use-is-client'
 import { clsxm } from '~/lib/helper'
 import { routeBuilder, Routes } from '~/lib/route-builder'
 
@@ -24,6 +25,7 @@ export const PostMetaBar: Component<{
 }> = ({ className, meta, children }) => {
   const { present } = useModalStack()
   const router = useRouter()
+  const isClient = useIsClient()
   return (
     <div
       className={clsxm(
@@ -40,16 +42,21 @@ export const PostMetaBar: Component<{
             </span>
           </>
         )}
-        {!!meta.modified && (
-          <FloatPopover
-            wrapperClassName="text-xs"
-            as="span"
-            type="tooltip"
-            triggerElement="(已编辑)"
-          >
-            编辑于 <RelativeTime date={meta.modified} />
-          </FloatPopover>
-        )}
+        {meta.modified ? (
+          isClient ? (
+            <FloatPopover
+              mobileAsSheet
+              wrapperClassName="text-xs"
+              as="span"
+              type="tooltip"
+              triggerElement="(已编辑)"
+            >
+              编辑于 <RelativeTime date={meta.modified} />
+            </FloatPopover>
+          ) : (
+            <span className="text-xs">(已编辑)</span>
+          )
+        ) : null}
       </div>
 
       {!!meta.category && (

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { JSX } from 'react'
 import type { FooterConfig } from './config'
 
 import { fetchAggregationData } from '~/app/(app)/api'
@@ -117,6 +118,7 @@ const PoweredBy: Component = ({ className }) => {
       <span className="mx-1">&</span>
       <FloatPopover
         isDisabled={!process.env.COMMIT_HASH}
+        mobileAsSheet
         type="tooltip"
         triggerElement={
           <StyledLink href="https://github.com/innei/Shiro" target="_blank">
@@ -134,7 +136,7 @@ const PoweredBy: Component = ({ className }) => {
         </StyledLink>{' '}
         的开源版本。
         {process.env.COMMIT_HASH && process.env.COMMIT_URL && (
-          <MLink href={process.env.COMMIT_URL}>
+          <MLink popper={false} href={process.env.COMMIT_URL}>
             版本哈希：{process.env.COMMIT_HASH.slice(0, 8)}
           </MLink>
         )}
@@ -185,11 +187,11 @@ const FooterBottom = async () => {
         <span>.</span>
         <span>
           <Divider />
-          <a href="/feed" target="_blank">
+          <a href="/feed" target="_blank" rel="noreferrer">
             RSS
           </a>
           <Divider />
-          <a href="/sitemap.xml" target="_blank">
+          <a href="/sitemap.xml" target="_blank" rel="noreferrer">
             站点地图
           </a>
           <Divider className="inline" />

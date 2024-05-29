@@ -45,15 +45,17 @@ export const NoteTitle = () => {
 
   if (!title) return null
   return (
-    <>
-      <h1 className="mt-8 text-left font-bold text-base-content/95">{title}</h1>
+    <div className="relative">
+      <h1 className="my-8 text-balance text-left text-4xl font-bold leading-tight text-base-content/95">
+        {title}
+      </h1>
 
       <GoToAdminEditingButton
         type="notes"
         id={id!}
         className="absolute right-0 top-0"
       />
-    </>
+    </div>
   )
 }
 
@@ -88,7 +90,15 @@ export const NoteHeaderDate = () => {
   }`
 
   return (
-    <FloatPopover as="span" type="tooltip" TriggerComponent={NoteDateMeta}>
+    <FloatPopover
+      sheet={{
+        triggerAsChild: false,
+      }}
+      as="span"
+      mobileAsSheet
+      type="tooltip"
+      TriggerComponent={NoteDateMeta}
+    >
       {tips}
     </FloatPopover>
   )

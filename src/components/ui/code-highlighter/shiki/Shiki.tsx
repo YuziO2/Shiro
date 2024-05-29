@@ -1,60 +1,74 @@
-import { useEffect, useMemo, useState } from 'react'
-import { getHighlighterCore } from 'shiki'
-import getWasm from 'shiki/wasm'
+import { use, useEffect, useMemo, useState } from 'react'
 import type { FC } from 'react'
 
-import { ShikiHighLighterWrapper } from './ShikiWrapper'
-import { codeHighlighter } from './utils'
+import { isServerSide } from '~/lib/env'
 
-interface Props {
+import { ShikiHighLighterWrapper } from './ShikiWrapper'
+import { parseShouldCollapsedFromAttrs } from './utils'
+
+export interface ShikiProps {
   lang: string | undefined
   content: string
 
   attrs?: string
 }
 
-const highlighterCore = await (async () => {
-  const loaded = await getHighlighterCore({
+const codeHighlighterPromise = (async () => {
+  if (isServerSide) return
+  const [{ getHighlighterCore }, getWasm, { codeHighlighter }] =
+    await Promise.all([
+      import('shiki/core'),
+      import('shiki/wasm').then((m) => m.default),
+      import('./core'),
+    ])
+
+  const core = await getHighlighterCore({
     themes: [
       import('shiki/themes/github-light.mjs'),
       import('shiki/themes/github-dark.mjs'),
     ],
-    langs: [
-      () => import('shiki/langs/javascript.mjs'),
-      () => import('shiki/langs/typescript.mjs'),
-      () => import('shiki/langs/css.mjs'),
-      () => import('shiki/langs/tsx.mjs'),
-      () => import('shiki/langs/jsx.mjs'),
-      () => import('shiki/langs/json.mjs'),
-      () => import('shiki/langs/sql.mjs'),
-      () => import('shiki/langs/rust.mjs'),
-      () => import('shiki/langs/go.mjs'),
-      () => import('shiki/langs/cpp.mjs'),
-      () => import('shiki/langs/c.mjs'),
-      () => import('shiki/langs/markdown.mjs'),
-      () => import('shiki/langs/vue.mjs'),
-      () => import('shiki/langs/html.mjs'),
-      () => import('shiki/langs/asm.mjs'),
-      () => import('shiki/langs/shell.mjs'),
-      () => import('shiki/langs/ps.mjs'),
-    ],
+    langs: [],
     loadWasm: getWasm,
   })
 
-  return loaded
+  return {
+    codeHighlighter: core,
+    fn: (o: { lang: string; attrs: string; code: string }) => {
+      return codeHighlighter(core, o)
+    },
+  }
 })()
 
-export const ShikiHighLighter: FC<Props> = (props) => {
+export const ShikiHighLighter: FC<ShikiProps> = (props) => {
   const { lang: language, content: value, attrs } = props
+  const codeHighlighter = use(codeHighlighterPromise)
 
+  use(
+    useMemo(async () => {
+      async function loadShikiLanguage(language: string, languageModule: any) {
+        const shiki = codeHighlighter?.codeHighlighter
+        if (!shiki) return
+        if (!shiki.getLoadedLanguages().includes(language)) {
+          await shiki.loadLanguage(await languageModule())
+        }
+      }
+
+      const { bundledLanguages } = await import('shiki/langs')
+
+      if (!language) return
+      const importFn = (bundledLanguages as any)[language]
+      if (!importFn) return
+      return loadShikiLanguage(language || '', importFn)
+    }, [codeHighlighter?.codeHighlighter, language]),
+  )
   const highlightedHtml = useMemo(() => {
-    return codeHighlighter(highlighterCore, {
+    return codeHighlighter?.fn?.({
       attrs: attrs || '',
       // code: `${value.split('\n')[0].repeat(10)} // [!code highlight]\n${value}`,
       code: value,
       lang: language ? language.toLowerCase() : '',
     })
-  }, [attrs, language, value])
+  }, [attrs, codeHighlighter, language, value])
 
   const [renderedHtml, setRenderedHtml] = useState(highlightedHtml)
   const [codeBlockRef, setCodeBlockRef] = useState<HTMLDivElement | null>(null)
@@ -81,6 +95,7 @@ export const ShikiHighLighter: FC<Props> = (props) => {
 
   return (
     <ShikiHighLighterWrapper
+      shouldCollapsed={parseShouldCollapsedFromAttrs(attrs || '')}
       {...props}
       renderedHTML={renderedHtml}
       ref={setCodeBlockRef}

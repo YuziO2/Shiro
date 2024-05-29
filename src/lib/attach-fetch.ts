@@ -1,9 +1,12 @@
-import { headers } from 'next/headers'
+import 'server-only'
+
+import { cookies, headers } from 'next/headers'
 
 import PKG from '../../package.json'
+import { AuthKeyNames } from './cookie'
 import { attachFetchHeader } from './request'
 
-export const attachUAAndRealIp = () => {
+export const attachServerFetch = () => {
   const { get } = headers()
 
   const ua = get('user-agent')
@@ -21,4 +24,11 @@ export const attachUAAndRealIp = () => {
     'User-Agent',
     `${ua} NextJS/v${PKG.dependencies.next} ${PKG.name}/${PKG.version}`,
   )
+}
+
+export const getAuthFromCookie = () => {
+  const cookie = cookies()
+  const jwt = cookie.get(AuthKeyNames[0])
+
+  return jwt?.value || ''
 }

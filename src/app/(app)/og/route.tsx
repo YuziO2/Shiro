@@ -156,7 +156,7 @@ export const GET = async (req: NextRequest) => {
         const { nid } = data
         document = await apiClient.note
           .getNoteById(+nid)
-          .then((r) => ({ title: r.data.title, subtitle: '生活记录' }))
+          .then((r) => ({ title: r.data.title, subtitle: '手记' }))
         break
       }
       case 'page': {
@@ -196,26 +196,27 @@ export const GET = async (req: NextRequest) => {
       lightness: [95, 96],
     }).color
 
-    let canShownTitle = ''
+    // let canShownTitle = ''
 
-    let leftContainerWidth = 1200 - 80 * 2
-    for (let i = 0; i < title.length; i++) {
-      if (leftContainerWidth < 0) break
-      //  cjk 字符算 64 px
-      const char = title[i]
-      // char 不能是 emoji
-      if ((char >= '\u4e00' && char <= '\u9fa5') || char === ' ') {
-        leftContainerWidth -= 64
-        canShownTitle += char
-      } else if (char >= '\u0000' && char <= '\u00ff') {
-        // latin 字符算 40px
-        leftContainerWidth -= 40
-        canShownTitle += char
-      } else {
-        leftContainerWidth -= 64
-        canShownTitle += char
-      }
-    }
+    // let leftContainerWidth = 1200 - 80 * 2
+    // const cjkWidth = 64
+    // for (let i = 0; i < title.length; i++) {
+    //   if (leftContainerWidth < 0) break
+    //   //  cjk 字符算 64 px
+    //   const char = title[i]
+    //   // char 不能是 emoji
+    //   if ((char >= '\u4e00' && char <= '\u9fa5') || char === ' ') {
+    //     leftContainerWidth -= cjkWidth
+    //     canShownTitle += char
+    //   } else if (char >= '\u0000' && char <= '\u00ff') {
+    //     // latin 字符算 40px
+    //     leftContainerWidth -= 40
+    //     canShownTitle += char
+    //   } else {
+    //     leftContainerWidth -= cjkWidth
+    //     canShownTitle += char
+    //   }
+    // }
 
     return new ImageResponse(
       (
@@ -277,12 +278,11 @@ export const GET = async (req: NextRequest) => {
             <h1
               style={{
                 color: 'rgba(255, 255, 255, 0.92)',
-
-                fontSize: `${(canShownTitle.length / title.length) * 64}px`,
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-                WebkitLineClamp: 1,
-                lineClamp: 1,
+                fontSize: '50px',
+                WebkitLineClamp: 2,
+                lineClamp: 2,
+                fontWeight: 800,
+                display: '-webkit-box',
               }}
             >
               {title}

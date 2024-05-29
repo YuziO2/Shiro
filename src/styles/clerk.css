@@ -7,6 +7,21 @@
   --accent: theme('colors.zinc.900');
   --accentDark: theme('colors.zinc.800');
 }
+.cl-userButtonPopoverCard.cl-userButton-popover {
+  @apply pt-0;
+}
+.cl-cardBox {
+  @apply overflow-visible;
+}
+.cl-socialButtons {
+  @apply flex flex-wrap items-center justify-center;
+}
+.cl-socialButtonsIconButton {
+  @apply box-content flex aspect-square h-5 min-h-0 w-5 items-center justify-center rounded-md bg-accent/5 p-3;
+}
+.cl-footer {
+  @apply hidden;
+}
 
 .cl-modalBackdrop {
   @apply flex flex-col items-center justify-center bg-base-100/90;
@@ -26,10 +41,6 @@
 
 .cl-userButtonPopoverCard .cl-userPreview {
   @apply px-4;
-}
-
-.cl-formFieldInput {
-  @apply bg-transparent text-zinc-800;
 }
 
 .cl-userButtonPopoverActionButton {
@@ -174,7 +185,7 @@
 
   .cl-formFieldInput,
   .cl-identityPreview {
-    @apply border-zinc-800 bg-transparent text-zinc-200;
+    @apply border-zinc-600 text-zinc-200;
   }
 
   .cl-footerActionText,
@@ -207,7 +218,16 @@
   .cl-identityPreviewEditButton {
     @apply text-zinc-200;
   }
+
+  .cl-formButtonPrimary {
+    @apply !text-black;
+  }
 }
+.cl-form,
+.cl-dividerRow {
+  @apply !hidden;
+}
+
 .cl-card:not(.cl-userButtonPopoverCard) {
   @apply pt-10;
 }
