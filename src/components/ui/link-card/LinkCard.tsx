@@ -1,10 +1,10 @@
-import type React from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 import { m, useMotionTemplate, useMotionValue } from 'framer-motion'
 import Link from 'next/link'
 import RemoveMarkdown from 'remove-markdown'
 import uniqolor from 'uniqolor'
+import type React from 'react'
 import type { FC, ReactNode, SyntheticEvent } from 'react'
 
 import { simpleCamelcaseKeys as camelcaseKeys } from '@mx-space/api-client'
@@ -177,13 +177,15 @@ const LinkCardImpl: FC<LinkCardProps> = (props) => {
         styles['card-grid'],
         (loading || isError) && styles['skeleton'],
         isError && styles['error'],
+        'not-prose',
+
         'group',
 
         className,
         classNames.cardRoot,
       )}
       style={{
-        borderColor: cardInfo?.color ? `${cardInfo.color}30` : '',
+        borderColor: cardInfo?.color ? `${cardInfo.color}30` : undefined,
       }}
       onClick={handleCanPeek}
       onMouseMove={handleMouseMove}
@@ -350,7 +352,7 @@ const fetchGitHubPRData: FetchObject = {
     return parts.length === 3 && parts.every((part) => part.length > 0)
   },
   fetch: async (id, setCardInfo, setFullUrl) => {
-    const [owner, repo, , prNumber] = id.split('/')
+    const [owner, repo, prNumber] = id.split('/')
     try {
       const response = await fetchGitHubApi(
         `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
