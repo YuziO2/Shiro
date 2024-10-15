@@ -1,13 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef } from 'react'
 import { produce } from 'immer'
-import type { PostRelated } from '~/models/writing'
 import type { FC } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import { MotionButtonBase, StyledButton } from '~/components/ui/button'
 import { InjectContext, useModalStack } from '~/components/ui/modal'
 import { EllipsisHorizontalTextWithTooltip } from '~/components/ui/typography'
 import { routeBuilder, Routes } from '~/lib/route-builder'
+import type { PostRelated } from '~/models/writing'
 import { adminQueries } from '~/queries/definition'
 
 import { SidebarSection } from '../../writing/SidebarBase'
@@ -78,7 +78,7 @@ export const RelatedPostSelector = () => {
                   )
                 }}
               >
-                <i className="icon-[mingcute--delete-2-line] text-base" />
+                <i className="i-mingcute-delete-2-line text-base" />
                 <span className="sr-only">删除</span>
               </MotionButtonBase>
             </MotionButtonBase>
@@ -93,9 +93,7 @@ const RealtedPostList: FC = () => {
   const relatedIds = usePostModelDataSelector((state) => state?.relatedId)
 
   const currentId = usePostModelDataSelector((state) => state?.id)
-  const selection = useMemo(() => {
-    return new Set(relatedIds)
-  }, [relatedIds])
+  const selection = useMemo(() => new Set(relatedIds), [relatedIds])
 
   const setter = usePostModelSetModelData()
 
@@ -140,8 +138,8 @@ const RealtedPostList: FC = () => {
 
   return (
     <ul className="h-full overflow-auto lg:max-h-full" ref={scrollerRef}>
-      {data?.pages.map((page) => {
-        return page.data.map((post) => {
+      {data?.pages.map((page) =>
+        page.data.map((post) => {
           if (post.id === currentId) return
           const labelFor = `related-${post.id}`
           return (
@@ -156,7 +154,7 @@ const RealtedPostList: FC = () => {
                 className="checkbox-accent checkbox"
                 checked={selection.has(post.id)}
                 onChange={(e) => {
-                  const checked = e.target.checked
+                  const { checked } = e.target
 
                   if (checked) {
                     setter(
@@ -194,8 +192,8 @@ const RealtedPostList: FC = () => {
               </label>
             </li>
           )
-        })
-      })}
+        }),
+      )}
 
       {isLoading && isFetching && (
         <div className="flex justify-center">

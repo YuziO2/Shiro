@@ -1,7 +1,6 @@
-import { useContext, useMemo } from 'react'
 import type { CommentModel } from '@mx-space/api-client'
-
 import { CollectionRefTypes } from '@mx-space/api-client'
+import { useContext, useMemo } from 'react'
 
 import { RelativeTime } from '~/components/ui/relative-time'
 import { EllipsisHorizontalTextWithTooltip } from '~/components/ui/typography'
@@ -30,9 +29,9 @@ export const CommentContentCell: Component<{ comment: CommentModel }> = (
   const ref = ctx.refModelMap.get(id)
 
   const TitleEl = useMemo(() => {
-    if (!ref) return <span className="text-foreground/60">已删除</span>
+    if (!ref) return <span className="opacity-60">已删除</span>
     if (refType === CollectionRefTypes.Recently)
-      return `${ref.text.slice(0, 20)}...`
+      return `${ref.text?.slice(0, 20)}...`
     return (
       <div className="flex w-0 grow items-center">
         <a

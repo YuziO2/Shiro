@@ -6,8 +6,6 @@ import { NumberSmoothTransition } from '~/components/ui/number-transition/Number
 import { mood2icon, weather2icon } from '~/lib/meta-icon'
 import { useCurrentNoteDataSelector } from '~/providers/note/CurrentNoteDataProvider'
 
-import { CurrentReadingCountingMetaBarItem } from '../shared/MetaBar'
-
 const dividerVertical = <DividerVertical className="!mx-2 scale-y-50" />
 
 const sectionBlockClassName = 'flex items-center space-x-1 flex-shrink-0'
@@ -59,7 +57,7 @@ export const NoteMetaReadCount = () => {
     <>
       {dividerVertical}
       <span className={sectionBlockClassName} key="readcount">
-        <i className="icon-[mingcute--book-6-line]" />
+        <i className="i-mingcute-book-6-line" />
 
         <span className="font-medium">
           <NumberSmoothTransition>{read}</NumberSmoothTransition>
@@ -76,7 +74,7 @@ export const NoteMetaLikeCount = () => {
     <>
       {dividerVertical}
       <span className={sectionBlockClassName} key="linkcount">
-        <i className="icon-[mingcute--heart-line]" />
+        <i className="i-mingcute-heart-line" />
         <span className="font-medium">
           <NumberSmoothTransition>{like}</NumberSmoothTransition>
         </span>
@@ -106,8 +104,4 @@ export const NoteMetaCC = () => {
       </span>
     </>
   )
-}
-
-export const NoteMetaReadingCount = () => {
-  return <CurrentReadingCountingMetaBarItem leftElement={dividerVertical} />
 }

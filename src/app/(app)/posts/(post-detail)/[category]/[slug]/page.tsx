@@ -1,14 +1,8 @@
 import type { ModelWithLiked, PostModel } from '@mx-space/api-client'
 import type { Metadata } from 'next'
-import type { PageParams } from './api'
 
 import { AckRead } from '~/components/common/AckRead'
 import { ClientOnly } from '~/components/common/ClientOnly'
-import {
-  buildRoomName,
-  Presence,
-  RoomProvider,
-} from '~/components/modules/activity'
 import { CommentAreaRootLazy } from '~/components/modules/comment'
 import {
   PostActionAside,
@@ -38,6 +32,7 @@ import {
 } from '~/providers/shared/LayoutRightSideProvider'
 import { WrappedElementProvider } from '~/providers/shared/WrappedElementProvider'
 
+import type { PageParams } from './api'
 import { getData } from './api'
 import {
   HeaderMetaInfoSetting,
@@ -119,7 +114,7 @@ const PostPage = ({ data }: { data: ModelWithLiked<PostModel> }) => {
         </div>
         <WrappedElementProvider eoaDetect>
           <ReadIndicatorForMobile />
-          <Presence />
+
           <PostMarkdownImageRecordProvider>
             <MarkdownSelection>
               <article className="prose">
@@ -168,9 +163,7 @@ export default definePrerenderPage<PageParams>()({
         <CurrentPostDataProvider data={data} />
         <div className="relative flex min-h-[120px] grid-cols-[auto,200px] lg:grid">
           <BottomToUpTransitionView className="min-w-0">
-            <RoomProvider roomName={buildRoomName(data.id)}>
-              <PostPage data={data} />
-            </RoomProvider>
+            <PostPage data={data} />
 
             <BottomToUpSoftScaleTransitionView delay={500}>
               <CommentAreaRootLazy

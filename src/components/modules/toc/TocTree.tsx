@@ -1,5 +1,9 @@
 'use client'
 
+import clsx from 'clsx'
+import { m } from 'framer-motion'
+import { atom, useAtom } from 'jotai'
+import type { FC } from 'react'
 import React, {
   memo,
   startTransition,
@@ -8,12 +12,6 @@ import React, {
   useMemo,
   useRef,
 } from 'react'
-import clsx from 'clsx'
-import { m } from 'framer-motion'
-import { atom, useAtom } from 'jotai'
-import type { FC } from 'react'
-import type { TocSharedProps } from './TocAside'
-import type { ITocItem } from './TocItem'
 
 import { Divider } from '~/components/ui/divider'
 import { RightToLeftTransitionView } from '~/components/ui/transition'
@@ -22,6 +20,8 @@ import { useMaskScrollArea } from '~/hooks/shared/use-mask-scrollarea'
 import { clsxm } from '~/lib/helper'
 import { springScrollToElement } from '~/lib/scroller'
 
+import type { TocSharedProps } from './TocAside'
+import type { ITocItem } from './TocItem'
 import { TocItem } from './TocItem'
 
 const tocActiveIdAtom = atom<string | null>(null)
@@ -87,7 +87,7 @@ export const TocTree: Component<
 
       return {
         depth,
-        index: isNaN(index) ? -1 : index,
+        index: Number.isNaN(index) ? -1 : index,
         title,
         anchorId: el.id,
         $heading: el,
@@ -145,21 +145,19 @@ export const TocTree: Component<
         className={clsx('scrollbar-none overflow-auto', scrollClassname)}
         ref={scrollContainerRef}
       >
-        {toc?.map((heading) => {
-          return (
-            <MemoedItem
-              heading={heading}
-              isActive={heading.anchorId === activeId}
-              key={heading.title}
-              rootDepth={rootDepth}
-              onClick={handleScrollTo}
-            />
-          )
-        })}
+        {toc?.map((heading) => (
+          <MemoedItem
+            heading={heading}
+            isActive={heading.anchorId === activeId}
+            key={`${heading.title}-${heading.index}`}
+            rootDepth={rootDepth}
+            onClick={handleScrollTo}
+          />
+        ))}
       </ul>
       {accessoryElement && (
         <li className="shrink-0">
-          {!!toc.length && <Divider />}
+          {toc.length > 0 && <Divider />}
           {accessoryElement}
         </li>
       )}
@@ -194,7 +192,7 @@ const MemoedItem = memo<{
     const containerHeight = $container.clientHeight
     const itemHeight = $item.clientHeight
     const itemOffsetTop = $item.offsetTop
-    const scrollTop = $container.scrollTop
+    const { scrollTop } = $container
 
     const itemTop = itemOffsetTop - scrollTop
     const itemBottom = itemTop + itemHeight

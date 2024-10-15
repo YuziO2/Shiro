@@ -1,6 +1,6 @@
-import type { MarkdownToJSX } from '~/components/ui/markdown'
 import type { FC } from 'react'
 
+import type { MarkdownToJSX } from '~/components/ui/markdown'
 import { Markdown } from '~/components/ui/markdown'
 
 const disabledTypes = [
@@ -14,13 +14,11 @@ const disabledTypes = [
 
 export const CommentMarkdown: FC<{
   children: string
-}> = ({ children }) => {
-  return (
-    <Markdown
-      disabledTypes={disabledTypes}
-      disableParsingRawHTML
-      forceBlock
-      value={children}
-    />
-  )
-}
+}> = ({ children }) => (
+  <Markdown
+    disabledTypes={disabledTypes}
+    disableParsingRawHTML
+    forceBlock
+    value={children}
+  />
+)

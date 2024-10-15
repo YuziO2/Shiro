@@ -1,14 +1,13 @@
-import { useMemo } from 'react'
 import { useAtomValue } from 'jotai'
 import { customAlphabet } from 'nanoid'
-
-import { useUser } from '@clerk/nextjs'
+import { useMemo } from 'react'
 
 import { isClientSide } from '~/lib/env'
 import { buildNSKey } from '~/lib/ns'
 
 import { socketIsConnectAtom } from '../socket'
 import { useIsLogged, useOwner } from './owner'
+import { useSessionReader } from './reader'
 
 const alphabet = `1234567890abcdefghijklmnopqrstuvwxyz`
 
@@ -27,7 +26,7 @@ export const getSocketWebSessionId = () => {
 }
 
 export const useSocketSessionId = () => {
-  const user = useUser()
+  const sessionReader = useSessionReader()
   const owner = useOwner()
   const ownerIsLogin = useIsLogged()
 
@@ -36,13 +35,11 @@ export const useSocketSessionId = () => {
     if (ownerIsLogin) {
       if (!owner) return fallbackSid
       return `owner_${owner.id}`
-    } else if (user && user.isSignedIn) {
-      return user.user.id.toLowerCase()
+    } else if (sessionReader) {
+      return sessionReader.id.toLowerCase()
     }
     return fallbackSid
-  }, [owner, ownerIsLogin, user])
+  }, [owner, ownerIsLogin, sessionReader])
 }
 
-export const useSocketIsConnect = () => {
-  return useAtomValue(socketIsConnectAtom)
-}
+export const useSocketIsConnect = () => useAtomValue(socketIsConnectAtom)

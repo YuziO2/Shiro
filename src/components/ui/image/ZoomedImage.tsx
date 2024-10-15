@@ -1,5 +1,17 @@
 'use client'
 
+import clsx from 'clsx'
+import { useIsomorphicLayoutEffect } from 'foxact/use-isomorphic-layout-effect'
+import type { Zoom } from 'medium-zoom'
+import mediumZoom from 'medium-zoom'
+import Image from 'next/image'
+import type {
+  AnimationEventHandler,
+  DetailedHTMLProps,
+  FC,
+  ImgHTMLAttributes,
+  ReactNode,
+} from 'react'
 import {
   cloneElement,
   forwardRef,
@@ -10,19 +22,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import clsx from 'clsx'
-import { useIsomorphicLayoutEffect } from 'foxact/use-isomorphic-layout-effect'
-import mediumZoom from 'medium-zoom'
-import Image from 'next/image'
 import { tv } from 'tailwind-variants'
-import type { Zoom } from 'medium-zoom'
-import type {
-  AnimationEventHandler,
-  DetailedHTMLProps,
-  FC,
-  ImgHTMLAttributes,
-  ReactNode,
-} from 'react'
 
 import { useIsMobile } from '~/atoms/hooks'
 import { LazyLoad } from '~/components/common/Lazyload'
@@ -165,8 +165,8 @@ export const ImageLazy: Component<TImageProps & BaseImageProps> = ({
           </span>
           {/* <div className="absolute top-0 opacity-30">{placeholder}</div> */}
           {imageLoadStatus === ImageLoadStatus.Error && (
-            <div className="absolute inset-0 z-[1] flex flex-col gap-8 center">
-              <i className="icon-[mingcute--close-line] text-4xl text-red-500" />
+            <div className="center absolute inset-0 z-[1] flex flex-col gap-8">
+              <i className="i-mingcute-close-line text-4xl text-red-500" />
               <span>图片加载失败</span>
 
               <Divider className="w-[80px] opacity-80" />

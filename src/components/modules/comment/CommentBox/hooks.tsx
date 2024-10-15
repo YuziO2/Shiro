@@ -1,10 +1,5 @@
 'use client'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useContext } from 'react'
-import { produce } from 'immer'
-import { atom, useAtomValue } from 'jotai'
-import { atomWithStorage, selectAtom } from 'jotai/utils'
 import type {
   CommentDto,
   CommentModel,
@@ -12,9 +7,13 @@ import type {
   RequestError,
 } from '@mx-space/api-client'
 import type { InfiniteData } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { produce } from 'immer'
 import type { ExtractAtomValue } from 'jotai'
-import type React from 'react'
-import type { createInitialValue } from './providers'
+import { atom, useAtomValue } from 'jotai'
+import { atomWithStorage, selectAtom } from 'jotai/utils'
+import type { PropsWithChildren } from 'react'
+import { useCallback, useContext } from 'react'
 
 import { useIsLogged } from '~/atoms/hooks'
 import { apiClient } from '~/lib/request'
@@ -24,6 +23,7 @@ import { toast } from '~/lib/toast'
 import { buildCommentsQueryKey } from '~/queries/keys'
 
 import { MAX_COMMENT_TEXT_LENGTH } from './constants'
+import type { createInitialValue } from './providers'
 import {
   CommentBoxContext,
   CommentBoxLifeCycleContext,
@@ -48,18 +48,16 @@ export const useCommentBoxTextValue = () =>
 export const useCommentBoxRefIdValue = () =>
   useAtomValue(useContext(CommentBoxContext).refId)
 
-export const useGetCommentBoxAtomValues = () => {
-  return useContext(CommentBoxContext)
-}
+export const useGetCommentBoxAtomValues = () => useContext(CommentBoxContext)
 export const useCommentBoxLifeCycle = () =>
   useContext(CommentBoxLifeCycleContext)
 
 // ReactNode 导致 tsx 无法推断，过于复杂
-const commentActionLeftSlotAtom = atom(null as React.JSX.Element | null)
+const commentActionLeftSlotAtom = atom(null as PropsWithChildren['children'])
 export const useCommentActionLeftSlot = () =>
   useAtomValue(commentActionLeftSlotAtom)
 
-export const setCommentActionLeftSlot = (slot: React.JSX.Element | null) =>
+export const setCommentActionLeftSlot = (slot: PropsWithChildren['children']) =>
   jotaiStore.set(commentActionLeftSlotAtom, slot)
 
 export const useCommentBoxHasText = () =>

@@ -1,9 +1,9 @@
 'use client'
 
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { useInView } from 'react-intersection-observer'
 import clsx from 'clsx'
 import type { FC, UIEventHandler } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { useInView } from 'react-intersection-observer'
 
 import { useStateToRef } from '~/hooks/common/use-state-ref'
 import { throttle } from '~/lib/lodash'
@@ -141,7 +141,7 @@ export const Gallery: FC<GalleryProps> = (props) => {
     }
   }, [])
 
-  if (!images.length) {
+  if (images.length === 0) {
     return null
   }
   if (images.length === 1) {
@@ -182,9 +182,9 @@ export const Gallery: FC<GalleryProps> = (props) => {
               const index = currentIndex - 1
               handleScrollTo(index)
             }}
-            className="border-border pointer-events-auto flex size-6 rounded-full border bg-base-100 p-1 opacity-80 center hover:opacity-100"
+            className="border-border center pointer-events-auto flex size-6 rounded-full border bg-base-100 p-1 opacity-80 hover:opacity-100"
           >
-            <i className="icon-[mingcute--left-fill]" />
+            <i className="i-mingcute-left-fill" />
           </MotionButtonBase>
         </div>
       )}
@@ -198,9 +198,9 @@ export const Gallery: FC<GalleryProps> = (props) => {
               const index = currentIndex + 1
               handleScrollTo(index)
             }}
-            className="border-border pointer-events-auto flex size-6 rounded-full border bg-base-100 p-1 opacity-80 center hover:opacity-100"
+            className="border-border center pointer-events-auto flex size-6 rounded-full border bg-base-100 p-1 opacity-80 hover:opacity-100"
           >
-            <i className="icon-[mingcute--right-fill]" />
+            <i className="i-mingcute-right-fill" />
           </MotionButtonBase>
         </div>
       )}

@@ -2,25 +2,18 @@
 
 import React from 'react'
 
-import { useUser } from '@clerk/nextjs'
-
+import { useSessionReader } from '~/atoms/hooks/reader'
 import { getStrategyIconComponent } from '~/components/ui/user/UserAuthStrategyIcon'
 import { clsxm } from '~/lib/helper'
 
 export const UserAuthFromIcon: Component = ({ className }) => {
-  const { user } = useUser()
-  const StrategyIcon = React.useMemo(() => {
-    const strategy = user?.primaryEmailAddress?.verification.strategy
-    if (!strategy) {
-      return null
-    }
-    return getStrategyIconComponent(strategy)
-  }, [user?.primaryEmailAddress?.verification.strategy])
+  const session = useSessionReader()
+  const provider = session?.provider
+  const StrategyIcon = provider && getStrategyIconComponent(provider)
 
   if (!StrategyIcon) {
     return null
   }
-
   return (
     <span
       className={clsxm(

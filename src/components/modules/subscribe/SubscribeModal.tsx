@@ -1,9 +1,9 @@
 'use client'
 
-import type React from 'react'
-import { useEffect, useReducer } from 'react'
 import type { SubscribeTypeToBitMap } from '@mx-space/api-client'
+import type React from 'react'
 import type { FC } from 'react'
+import { useEffect, useReducer } from 'react'
 
 import { StyledButton } from '~/components/ui/button'
 import { Input } from '~/components/ui/input/Input'
@@ -45,10 +45,12 @@ const useFormData = () => {
   const [state, dispatch] = useReducer(
     (state: typeof initialState, payload: Action) => {
       switch (payload.type) {
-        case 'set':
+        case 'set': {
           return { ...state, ...payload.data }
-        case 'reset':
+        }
+        case 'reset': {
           return initialState
+        }
       }
     },
     { ...initialState },
@@ -67,7 +69,7 @@ export const SubscribeModal: FC<SubscribeModalProps> = ({
   const stateRef = useStateToRef(state)
 
   useEffect(() => {
-    if (!defaultTypes || !defaultTypes.length) {
+    if (!defaultTypes || defaultTypes.length === 0) {
       return
     }
 
@@ -109,7 +111,7 @@ export const SubscribeModal: FC<SubscribeModalProps> = ({
 
   return (
     <form onSubmit={handleSubList} className="flex flex-col gap-5">
-      <p className="text-gray-1 text-sm">
+      <p className="text-sm opacity-90">
         欢迎订阅「{title}
         」，我会定期推送最新的内容到你的邮箱。
       </p>
@@ -155,7 +157,7 @@ export const SubscribeModal: FC<SubscribeModalProps> = ({
           ))}
       </div>
 
-      <p className="text-gray-1 -mt-2 text-sm">
+      <p className="-mt-2 text-sm opacity-90">
         或者你也可以通过{' '}
         <a href="/feed" className="text-green" target="_blank" rel="noreferrer">
           /feed

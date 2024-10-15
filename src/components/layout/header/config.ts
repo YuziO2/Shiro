@@ -1,5 +1,5 @@
-import { createElement as h } from 'react'
 import type { ReactNode } from 'react'
+import { createElement as h } from 'react'
 
 import {
   FaSolidCircle,
@@ -71,7 +71,7 @@ export const headerMenuConfig: IHeaderMenu[] = [
         title: '专栏',
         path: '/notes/topics',
         icon: h('i', {
-          className: 'icon-[mingcute--align-bottom-fill] flex center',
+          className: 'i-mingcute-align-bottom-fill flex center',
         }),
       },
     ],

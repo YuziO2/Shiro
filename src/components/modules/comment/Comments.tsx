@@ -1,11 +1,10 @@
 'use client'
 
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { memo, useEffect, useMemo } from 'react'
-import type { FC } from 'react'
-import type { CommentBaseProps } from './types'
-
+import type { ReaderModel } from '@mx-space/api-client'
 import { BusinessEvents } from '@mx-space/webhook'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import type { FC } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 
 import { ErrorBoundary } from '~/components/common/ErrorBoundary'
 import { NotSupport } from '~/components/common/NotSupport'
@@ -17,7 +16,9 @@ import { WsEvent } from '~/socket/util'
 import { LoadMoreIndicator } from '../shared/LoadMoreIndicator'
 import { Comment } from './Comment'
 import { CommentBoxProvider } from './CommentBox/providers'
+import { CommentProvider } from './CommentProvider'
 import { CommentSkeleton } from './CommentSkeleton'
+import type { CommentBaseProps } from './types'
 
 const useNewCommentObserver = (refId: string) => {
   useEffect(() => {
@@ -32,12 +33,11 @@ const useNewCommentObserver = (refId: string) => {
     document.addEventListener('visibilitychange', onVisibilityChange)
 
     const cleaner = WsEvent.on(BusinessEvents.COMMENT_CREATE, (data: any) => {
-      if (data.ref === refId) {
-        // 如果标签页在后台
-
-        if (document.visibilityState === 'hidden') {
-          document.title = `新评论！${currentTitle}`
-        }
+      if (
+        data.ref === refId && // 如果标签页在后台
+        document.visibilityState === 'hidden'
+      ) {
+        document.title = `新评论！${currentTitle}`
       }
     })
     return () => {
@@ -72,34 +72,40 @@ export const Comments: FC<CommentBaseProps> = ({ refId }) => {
     initialPageParam: 1 as number | undefined,
   })
 
+  const readers = useMemo(() => {
+    if (!data) return {}
+    return data?.pages.reduce(
+      (acc, curr) => ({ ...acc, ...curr.readers }),
+      {} as Record<string, ReaderModel>,
+    )
+  }, [data])
   if (isLoading) {
     return <CommentSkeleton />
   }
-  if (!data || !data.pages.length || !data.pages[0].data.length)
+  if (!data || data.pages.length === 0 || data.pages[0].data.length === 0)
     return (
-      <div className="flex min-h-[400px] center">
+      <div className="center flex min-h-[400px]">
         <NotSupport text="这里还没有评论呢" />
       </div>
     )
   return (
     <ErrorBoundary>
-      <ul className="min-h-[400px] list-none space-y-4">
-        {data?.pages.map((data, index) => {
-          return (
+      <CommentProvider readers={readers}>
+        <ul className="min-h-[400px] list-none space-y-4">
+          {data?.pages.map((data, index) => (
             <BottomToUpSoftScaleTransitionView key={index}>
-              {data.data.map((comment) => {
-                return (
-                  <CommentListItem
-                    comment={comment}
-                    key={comment.id}
-                    refId={refId}
-                  />
-                )
-              })}
+              {data.data.map((comment) => (
+                <CommentListItem
+                  comment={comment}
+                  key={comment.id}
+                  refId={refId}
+                />
+              ))}
             </BottomToUpSoftScaleTransitionView>
-          )
-        })}
-      </ul>
+          ))}
+        </ul>
+      </CommentProvider>
+
       {hasNextPage && (
         <LoadMoreIndicator onLoading={fetchNextPage}>
           <CommentSkeleton />

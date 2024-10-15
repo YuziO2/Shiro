@@ -1,10 +1,10 @@
 'use client'
 
-import { memo } from 'react'
+import type { Target, TargetAndTransition } from 'framer-motion'
 import { m } from 'framer-motion'
 import Link from 'next/link'
+import { memo } from 'react'
 import { tv } from 'tailwind-variants'
-import type { Target, TargetAndTransition } from 'framer-motion'
 
 import { LeftToRightTransitionView } from '~/components/ui/transition'
 import { getToken } from '~/lib/cookie'
@@ -54,7 +54,7 @@ export const NoteTimelineItem = memo<{
           as="span"
           className="inline-flex items-center"
         >
-          <i className="icon-[material-symbols--arrow-circle-right-outline-rounded] duration-200" />
+          <i className="i-material-symbols-arrow-circle-right-outline-rounded duration-200" />
         </LeftToRightTransitionView>
       )}
       <Link

@@ -1,9 +1,9 @@
 'use client'
 
-import { queryClient } from '~/providers/root/react-query-provider'
 import { Suspense } from 'react'
 
 import { clsxm } from '~/lib/helper'
+import { queryClient } from '~/providers/root/react-query-provider'
 
 import { AutoResizeHeight } from '../shared/AutoResizeHeight'
 
@@ -47,7 +47,7 @@ export const XLogSummaryAsync = async (
       )}
     >
       <div className="flex items-center">
-        <i className="icon-[mingcute--sparkles-line] mr-2 text-lg" />
+        <i className="i-mingcute-sparkles-line mr-2 text-lg" />
         AI 生成的摘要
       </div>
 
@@ -56,7 +56,7 @@ export const XLogSummaryAsync = async (
           <RealDataRender cid={cid} />
         </Suspense>
       </AutoResizeHeight>
-      <p className="mt-3 border-slate-200 text-right text-sm dark:border-slate-800 ">
+      <p className="mt-3 border-slate-200 text-right text-sm dark:border-slate-800">
         (此服务由{' '}
         <a href="https://xlog.app" target="_blank" rel="noreferrer">
           xLog

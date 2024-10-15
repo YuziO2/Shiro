@@ -1,7 +1,8 @@
-import { createModelDataProvider } from 'jojoo/react'
-import { useContext, useMemo } from 'react'
 import { produce } from 'immer'
+import { createModelDataProvider } from 'jojoo/react'
 import { atom, useAtom } from 'jotai'
+import { useContext, useMemo } from 'react'
+
 import type { PostDto } from '~/models/writing'
 
 export const {
@@ -21,21 +22,23 @@ export const usePostModelSingleFieldAtom = <
 ) => {
   const ctxAtom = useContext(ModelDataAtomContext)
   return useAtom(
-    useMemo(() => {
-      return atom(
-        (get) => {
-          const data = get(ctxAtom)
-          return data?.[key]
-        },
-        (get, set, update: any) => {
-          set(ctxAtom, (prev) => {
-            return produce(prev, (draft) => {
-              ;(draft as any)[key as any] = update
-            })
-          })
-        },
-      )
-    }, [ctxAtom, key]),
+    useMemo(
+      () =>
+        atom(
+          (get) => {
+            const data = get(ctxAtom)
+            return data?.[key]
+          },
+          (get, set, update: any) => {
+            set(ctxAtom, (prev) =>
+              produce(prev, (draft) => {
+                ;(draft as any)[key as any] = update
+              }),
+            )
+          },
+        ),
+      [ctxAtom, key],
+    ),
   ) as any as [
     NonNullable<PostDto[T]>,
 

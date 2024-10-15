@@ -1,13 +1,11 @@
 'use client'
 
-import { useMemo } from 'react'
+import { CollectionRefTypes } from '@mx-space/api-client'
 import clsx from 'clsx'
 import Link from 'next/link'
-import RemoveMarkdown from 'remove-markdown'
 import type { ReactNode } from 'react'
-import type { ReactActivityType } from './types'
-
-import { CollectionRefTypes } from '@mx-space/api-client'
+import { useMemo } from 'react'
+import RemoveMarkdown from 'remove-markdown'
 
 import {
   FaSolidFeatherAlt,
@@ -16,6 +14,8 @@ import {
 } from '~/components/icons/menu-collection'
 import { routeBuilder, Routes } from '~/lib/route-builder'
 import { useAggregationSelector } from '~/providers/root/aggregation-data-provider'
+
+import type { ReactActivityType } from './types'
 
 export const iconClassName =
   'rounded-full border shrink-0 border-accent/30 text-xs center inline-flex size-6 text-accent'
@@ -52,7 +52,7 @@ export const ActivityCard = ({ activity }: { activity: ReactActivityType }) => {
                 iconClassName,
               )}
             >
-              <i className="icon-[mingcute--comment-line]" />
+              <i className="i-mingcute-comment-line" />
             </div>
             <div className="flex items-center gap-2 pl-8">
               <div className="space-x-2">
@@ -175,7 +175,7 @@ export const ActivityCard = ({ activity }: { activity: ReactActivityType }) => {
         return (
           <div className="flex translate-y-1/4 items-start gap-2">
             <span className={clsx(iconClassName)}>
-              <i className="icon-[mingcute--heart-line]" />
+              <i className="i-mingcute-heart-line" />
             </span>
             <div className="space-x-2">
               <small>有人点赞了</small> {TitleLink}

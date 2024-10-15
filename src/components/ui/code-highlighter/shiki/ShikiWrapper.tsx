@@ -1,3 +1,7 @@
+import clsx from 'clsx'
+import type { Variants } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
+import type { PropsWithChildren } from 'react'
 import {
   forwardRef,
   useCallback,
@@ -7,10 +11,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import clsx from 'clsx'
-import { AnimatePresence, m } from 'framer-motion'
-import type { Variants } from 'framer-motion'
-import type { PropsWithChildren } from 'react'
 
 import { getViewport } from '~/atoms/hooks'
 import { AutoResizeHeight } from '~/components/modules/shared/AutoResizeHeight'
@@ -95,7 +95,7 @@ export const ShikiHighLighterWrapper = forwardRef<
 
       const $hightlighted = $el.querySelector('.highlighted')
       if ($hightlighted) {
-        const lineHeight = parseInt(
+        const lineHeight = Number.parseInt(
           getComputedStyle($hightlighted).height || '0',
           10,
         )
@@ -111,9 +111,7 @@ export const ShikiHighLighterWrapper = forwardRef<
     }
   }, [value, codeBlockRef])
 
-  const filename = useMemo(() => {
-    return parseFilenameFromAttrs(attrs || '')
-  }, [attrs])
+  const filename = useMemo(() => parseFilenameFromAttrs(attrs || ''), [attrs])
   const [, maskClassName] = useMaskScrollArea({
     element: codeBlockRef!,
     size: 'lg',
@@ -147,7 +145,7 @@ export const ShikiHighLighterWrapper = forwardRef<
         <MotionButtonBase
           onClick={handleCopy}
           className={clsx(
-            'absolute right-2 top-2 z-[3] flex text-xs center',
+            'center absolute right-2 top-2 z-[3] flex text-xs',
             'rounded-md border border-accent/5 bg-accent/80 p-1.5 text-white backdrop-blur duration-200',
             'opacity-0 group-hover:opacity-100',
             filename && '!top-12',
@@ -157,13 +155,13 @@ export const ShikiHighLighterWrapper = forwardRef<
             {copied ? (
               <m.i
                 key={'copied'}
-                className="icon-[mingcute--check-line] size-4"
+                className="i-mingcute-check-line size-4"
                 {...copyIconVariants}
               />
             ) : (
               <m.i
                 key={'copy'}
-                className="icon-[mingcute--copy-2-fill] size-4"
+                className="i-mingcute-copy-2-fill size-4"
                 {...copyIconVariants}
               />
             )}
@@ -212,7 +210,7 @@ export const ShikiHighLighterWrapper = forwardRef<
                 aria-hidden
                 className="flex items-center justify-center text-xs"
               >
-                <i className="icon-[mingcute--arrow-to-down-line]" />
+                <i className="i-mingcute-arrow-to-down-line" />
                 <span className="ml-2">展开</span>
               </button>
             </div>

@@ -1,8 +1,8 @@
 'use client'
 
-import { memo, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FC, ReactNode } from 'react'
+import { memo, useCallback, useMemo } from 'react'
 
 import { isServerSide } from '~/lib/env'
 import { useAppConfigSelector } from '~/providers/root/aggregation-data-provider'
@@ -46,8 +46,8 @@ export const MLink: FC<{
         return
       }
       e.preventDefault()
-      const pathArr = toUrlParser.pathname.split('/').filter(Boolean)
-      const headPath = pathArr[0]
+      const pathArr = toUrlParser.pathname.split('/').find(Boolean)
+      const headPath = pathArr
 
       switch (headPath) {
         case 'posts':
@@ -78,7 +78,7 @@ export const MLink: FC<{
         {children}
       </a>
 
-      <i className="icon-[mingcute--arrow-right-up-line] translate-y-[2px] opacity-70" />
+      <i className="i-mingcute-arrow-right-up-line translate-y-[2px] opacity-70" />
     </span>
   )
   if (!popper) return el
@@ -101,7 +101,7 @@ const BizSelfFavicon = () => {
   const { favicon, faviconDark } = useAppConfigSelector((a) => a.site) || {}
   if (!favicon && !faviconDark) return null
   return (
-    <span className="mr-1 inline-flex size-4 center">
+    <span className="center mr-1 inline-flex size-4">
       <img
         className="inline size-4 dark:hidden"
         src={favicon ? favicon : faviconDark ? faviconDark : ''}

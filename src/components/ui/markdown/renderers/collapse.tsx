@@ -1,6 +1,6 @@
-import { useCallback, useLayoutEffect, useState } from 'react'
 import clsx from 'clsx'
 import type { FC, ReactNode } from 'react'
+import { useCallback, useLayoutEffect, useState } from 'react'
 
 import { useIsPrintMode } from '~/atoms'
 import { IcRoundKeyboardDoubleArrowRight } from '~/components/icons/arrow'
@@ -29,7 +29,7 @@ export const MDetails: FC<{ children: ReactNode[] }> = (props) => {
       >
         <i
           className={clsx(
-            'icon-[mingcute--align-arrow-down-line] mr-2 transition-transform duration-500',
+            'i-mingcute-align-arrow-down-line mr-2 transition-transform duration-500',
             !open && '-rotate-90',
           )}
         >

@@ -1,6 +1,6 @@
 import clsx from 'clsx'
-import { blockRegex, Priority } from 'markdown-to-jsx'
 import type { MarkdownToJSX } from 'markdown-to-jsx'
+import { blockRegex, Priority } from 'markdown-to-jsx'
 import type { FC } from 'react'
 
 import {
@@ -38,10 +38,7 @@ export const AlertIcon: FC<{
 
   return (
     <span
-      className={clsx(
-        'text-semibold mb-1 inline-flex items-center',
-        textColorMap[finalType],
-      )}
+      className={clsx('mb-1 inline-flex items-center', textColorMap[finalType])}
     >
       <Icon
         className={clsx(
@@ -61,7 +58,7 @@ export const AlertIcon: FC<{
  * > Highlights information that users should take into account, even when skimming.
  */
 const ALERT_BLOCKQUOTE_R =
-  /^(> \[!(?<type>NOTE|IMPORTANT|WARNING)\].*?)(?<body>(?:\n *>.*?)*)(?=\n{2,}|$)/
+  /^(> \[!(?<type>NOTE|IMPORTANT|WARNING)\].*)(?<body>(?:\n *>.*)*)(?=\n{2,}|$)/
 
 export const AlertsRule: MarkdownToJSX.Rule = {
   match: blockRegex(ALERT_BLOCKQUOTE_R),
@@ -76,7 +73,7 @@ export const AlertsRule: MarkdownToJSX.Rule = {
   },
   react(node, output, state) {
     const { type, body } = node.parsed
-    const bodyClean = body.replace(/^> */gm, '')
+    const bodyClean = body.replaceAll(/^> */gm, '')
 
     return (
       <blockquote

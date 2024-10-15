@@ -1,0 +1,21 @@
+diff --git a/client/_utils.js b/client/_utils.js
+index 25bd573915c9bd9251ed6ce241889e0d6f13ba55..13a0976921eee51ecaab15ec062ba3ce6e8b47ce 100644
+--- a/client/_utils.js
++++ b/client/_utils.js
+@@ -46,6 +46,7 @@ function _fetchData() {
+             options.method = "POST";
+           }
+           _context.next = 7;
++          options.credentials = "include";
+           return fetch(url, options);
+         case 7:
+           res = _context.sent;
+@@ -63,7 +64,7 @@ function _fetchData() {
+         case 16:
+           _context.prev = 16;
+           _context.t0 = _context["catch"](2);
+-          logger.error("CLIENT_FETCH_ERROR", {
++          console.error("CLIENT_FETCH_ERROR", {
+             error: _context.t0,
+             url: url
+           });

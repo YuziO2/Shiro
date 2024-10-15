@@ -1,8 +1,8 @@
-import { useQueryClient } from '@tanstack/react-query'
-import { produce } from 'immer'
 import type { CommentModel, PaginateResult } from '@mx-space/api-client'
 import type { InfiniteData } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import type { Draft } from 'immer'
+import { produce } from 'immer'
 import type { SVGProps } from 'react'
 
 import { apiClient } from '~/lib/request'
@@ -21,8 +21,8 @@ export const CommentPinButton = ({ comment }: { comment: CommentModel }) => {
       onPinChange={async (nextPin) => {
         queryClient.setQueryData<InfiniteData<PaginateResult<CommentModel>>>(
           buildCommentsQueryKey(refId),
-          (old) => {
-            return produce(old, (draft) => {
+          (old) =>
+            produce(old, (draft) => {
               if (!draft) return draft
               let draftComment: Draft<CommentModel | null> = null
               draft.pages.forEach((page) =>
@@ -34,8 +34,7 @@ export const CommentPinButton = ({ comment }: { comment: CommentModel }) => {
               if (!draftComment) return draft
               ;(draftComment as any as CommentModel).pin = nextPin
               return draft
-            })
-          },
+            }),
         )
         await apiClient.comment.proxy(comment.id).patch({
           data: {
