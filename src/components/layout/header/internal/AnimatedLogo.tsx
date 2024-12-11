@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { AnimatePresence, m } from 'framer-motion'
+import { AnimatePresence, m } from 'motion/react'
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 
@@ -83,7 +83,7 @@ export const AnimatedLogo = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex items-center"
+          className="flex items-center !will-change-[unset]"
         >
           <Activity />
           <TapableLogo />
