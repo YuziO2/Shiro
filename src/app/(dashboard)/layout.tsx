@@ -1,12 +1,10 @@
 import type { Viewport } from 'next'
 import { PublicEnvScript } from 'next-runtime-env'
 import type { PropsWithChildren } from 'react'
-import { ToastContainer } from 'react-toastify'
 
 import { ClientOnly } from '~/components/common/ClientOnly'
 import { HydrationEndDetector } from '~/components/common/HydrationEndDetector'
 import { MainLayout } from '~/components/modules/dashboard/layouts'
-import { AccentColorStyleInjector } from '~/components/modules/shared/AccentColorStyleInjector'
 import { FABContainer } from '~/components/ui/fab'
 import { sansFont, serifFont } from '~/lib/fonts'
 import { getQueryClient } from '~/lib/query-client.server'
@@ -43,7 +41,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
       <head>
         <title>Shiro · Light Dashboard | Powered by Mix Space</title>
         <HydrationEndDetector />
-        <AccentColorStyleInjector />
+        {/* <AccentColorStyleInjector /> */}
 
         <link
           rel="shortcut icon"
@@ -60,6 +58,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         <PublicEnvScript />
       </head>
       <body
+        suppressHydrationWarning
         id="dashboard"
         className={`${sansFont.variable} ${serifFont.variable} m-0 h-full bg-gray-50 p-0 font-sans dark:bg-black`}
       >
@@ -75,7 +74,6 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             <FABContainer />
           </ClientOnly>
         </DashboardAppProviders>
-        <ToastContainer />
       </body>
     </html>
   )
